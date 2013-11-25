@@ -10,9 +10,7 @@
     "gpio"
   ],
   "dependencies": {
-    "submachine": "0.1.x"
-  },
-  "devDependancies": {
+    "submachine": "0.1.x",
     "mocha": "1.14.x",
     "chai": "1.8.x",
     "chai-spies": "0.5.x"
