@@ -1,10 +1,7 @@
 var chai = require("chai")
-  , spies = require("chai-spies");
-
-chai.use(spies);
-
-var expect = chai.expect;
-var gpio = require("./support/mock-gpio");
+  , sinon = require("sinon")
+  , expect = chai.expect
+  , gpio = require("./mocks/gpio");
 
 describe("mock-gpio", function() {
   describe('#exports', function() {
@@ -38,7 +35,11 @@ describe("mock-gpio", function() {
       expect(pin.interval).to.equal(99);
     });
 
-    it('should execute the opts.ready callback');
+    it('should execute the opts.ready callback', function() {
+      var callback = sinon.spy();
+      var pin = gpio.export(1, {"ready": callback});
+      expect(callback.called).to.be.true;
+    });
   });
 
   describe('#setDirection', function() {
@@ -49,7 +50,13 @@ describe("mock-gpio", function() {
       expect(pin.direction).to.equal("out");
     });
 
-    it('should fire a `directionChange` event');
+    it('should fire a `directionChange` event', function() {
+      var cb = sinon.spy();
+      var pin = gpio.export(1);
+      pin.on("directionChange", cb);
+      pin.setDirection("in");
+      expect(cb.called).to.be.true;
+    });
   });
 
   describe('#set', function() {
@@ -60,8 +67,27 @@ describe("mock-gpio", function() {
       expect(pin.value).to.equal(1);
     });
 
-    it('should execute the callback');
-    it('should fire a `valueChange` event');
-    it('should fire a `change` event');
+    it('should execute the callback', function() {
+      var callback = sinon.spy();
+      var pin = gpio.export(1);
+      pin.set(1, callback);
+      expect(callback.called).to.be.true; 
+    });
+
+    it('should fire a `valueChange` event', function() {
+      var cb = sinon.spy();
+      var pin = gpio.export(1);
+      pin.on("valueChange", cb);
+      pin.set(1);
+      expect(cb.called).to.be.true;
+    });
+
+    it('should fire a `change` event', function() {
+      var cb = sinon.spy();
+      var pin = gpio.export(1);
+      pin.on("change", cb);
+      pin.set(1);
+      expect(cb.called).to.be.true;
+    });
   });
 })
