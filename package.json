@@ -14,7 +14,8 @@
   },
   "devDependancies": {
     "mocha": "1.14.x",
-    "expect": "0.0.2"
+    "chai": "1.8.x",
+    "chai-spies": "0.5.x"
   },
   "repository": {
     "type": "git",
