@@ -1,8 +1,8 @@
 var chai = require("chai")
   , sinon = require("sinon")
   , expect = chai.expect
-  , Device = require("../lib/device")
-  , gpio = require("./mocks/gpio");
+  , Device = require("../../app/device")
+  , gpio = require("../mocks/gpio");
 
 describe('Device', function() {
   describe('#initialize', function() {
