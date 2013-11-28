@@ -6,7 +6,7 @@ var chai = require("chai")
 
 describe('Device', function() {
   describe('#initialize', function() {
-    it('should have a gpio pin', function(){
+    it('has a gpio pin', function(){
       var device = new Device(gpio.export(2));
       expect(device.gpio).to.be.ok;
     });
@@ -16,17 +16,17 @@ describe('Device', function() {
       expect(device.gpio.direction).to.equal("out");
     });
 
-    it('should have an id', function() {
+    it('has an id', function() {
       var d = new Device(gpio.export(1), "switch");
       expect(d.id).to.equal("switch");
     });
 
-    it('should have an createdAt timestamp', function() {
+    it('has a createdAt timestamp', function() {
       var d = new Device(gpio.export(1), "switch");
       expect(d.createdAt).to.be.above(1);
     });
 
-    it('should be in the off state when first created', function(){
+    it('is in the off state when first created', function(){
       var device = new Device(gpio.export(1));
       expect(device.is("off")).to.be.true;
     });
