@@ -18,10 +18,19 @@ var Device = Submachine.subclass(function(proto) {
     return this.state == state;
   };
 
+  proto.toJson = function() {
+    return {
+      "id" : this.id,
+      "createdAt" : this.createdAt,
+      "state" : this.state
+    }
+  };
+
   proto.initialize = function(gpio, id) {
     this.gpio = gpio;
     if (this.gpio.direction == "in") this.gpio.setDirection("out");
     this.id = id; 
+    this.createdAt = Math.round(Date.now() / 1000);
     this.initState("off");
   };
 });

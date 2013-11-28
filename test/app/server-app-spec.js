@@ -1,8 +1,8 @@
 var chai = require("chai")
   , sinon = require("sinon")
   , expect = chai.expect
-  , c = require('../../config/app.js')
-  , A = require('../../app/server-app.js')
+  , c = require('../../config/app')
+  , A = require('../../app/server-app')
   , mockGpio = require('../mocks/gpio');
 
 describe("App", function() {
@@ -18,7 +18,7 @@ describe("App", function() {
     });
 
     it('has an empty devices array', function() {
-      var app = new A(c); 
+      var app = new A(c);
       expect(app.devices.length).to.equal(0);
     });
   });

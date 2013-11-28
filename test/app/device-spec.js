@@ -21,6 +21,11 @@ describe('Device', function() {
       expect(d.id).to.equal("switch");
     });
 
+    it('should have an createdAt timestamp', function() {
+      var d = new Device(gpio.export(1), "switch");
+      expect(d.createdAt).to.be.above(1);
+    });
+
     it('should be in the off state when first created', function(){
       var device = new Device(gpio.export(1));
       expect(device.is("off")).to.be.true;
