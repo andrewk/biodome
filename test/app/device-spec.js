@@ -47,7 +47,6 @@ describe('Device', function() {
   });
 
   describe('#off', function() {
-
     it('should set device state to "off"', function() {
       var d = new Device(gpio.export(1));
       d.off();
@@ -60,5 +59,22 @@ describe('Device', function() {
       expect(d.gpio.value).to.equal(0);
     });
   });
+
+  describe('#switch', function() {
+    it('should set device state to "off" if set to "on"', function() {
+      var d = new Device(gpio.export(1));
+      expect(d.is("off")).to.be.true;
+      d.switch("on");
+      expect(d.is("on")).to.be.true;
+    });
+
+    it('should ignore unknown states', function() {
+      var d = new Device(gpio.export(1));
+      expect(d.is("off")).to.be.true;
+      d.switch("squirrels!");
+      expect(d.is("off")).to.be.true;
+    });
+  });
+
 });
 

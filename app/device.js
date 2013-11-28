@@ -23,7 +23,15 @@ var Device = Submachine.subclass(function(proto) {
       "id" : this.id,
       "createdAt" : this.createdAt,
       "state" : this.state
-    }
+    };
+  };
+
+  proto.switch = function(state) {
+    if (state == this.state) return;
+    if (["on", "off"].indexOf(state) == -1) return;
+
+    if(state == "on") this.on();
+    if(state == "off") this.off();  
   };
 
   proto.initialize = function(gpio, id) {

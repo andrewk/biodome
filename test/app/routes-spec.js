@@ -14,8 +14,8 @@ describe("routes", function() {
     server.close();
   });
 
-  describe('/devices', function() {
-    it('responds to GET with 200ok', function(done) {
+  describe('GET /devices', function() {
+    it('responds with 200ok', function(done) {
       request(server)
         .get('/devices')
         .expect(200, done);
@@ -39,8 +39,8 @@ describe("routes", function() {
     });
   });
 
-  describe('/devices/:id', function() {
-    it('responds to GET with 200ok', function(done) {
+  describe('GET /devices/:id', function() {
+    it('responds with 200ok', function(done) {
       request(server)
         .get('/devices/'+ app.devices[0].id)
         .expect(200, done);
@@ -51,7 +51,6 @@ describe("routes", function() {
         .get('/devices/i_am_not_real')
         .expect(404, done);
     });
-
 
     it('responds with JSON resource', function(done) {
       request(server)
@@ -67,5 +66,41 @@ describe("routes", function() {
     });
   });
 
+  describe('PUT /devices/:id', function() {
+    it('responds with 404 for unknown device', function(done) {
+      request(server)
+        .put('/devices/does_not_exist')
+        .send({ "id" : "does_not_exist", "state" : "on" })
+        .expect(404, done)
+    });
+
+    it('responds with 400 for unknown state', function(done) {
+      request(server)
+        .put('/devices/'+ app.devices[0].id)
+        .send({ "id" : app.devices[0].id, "state" : "fooqux" })
+        .expect(400, done)
+    });
+
+    it('responds with 400 for different IDs between URL & data', function(done) {
+      request(server)
+        .put('/devices/'+ app.devices[0].id)
+        .send({ "id" : "not_real_id", "state" : "off" })
+        .expect(400, done)
+    });
+
+    it('responds with 200 and updated device on success', function(done) {
+      app.devices[0].off();
+
+      request(server)
+        .put('/devices/'+ app.devices[0].id)
+        .send({ "id" : app.devices[0].id, "state" : "on" })
+        .expect(200)
+        .end(function(err, res) {
+          expect(res.body.id).to.equal(app.devices[0].id);
+          expect(res.body.state).to.equal("on");
+          done();
+        });
+    });
+  });
 
 });
