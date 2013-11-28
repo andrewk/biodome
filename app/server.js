@@ -4,7 +4,7 @@ var restify = require('restify')
 module.exports = function(app) {
 
   var server = restify.createServer({
-    name: 'BiodomeServer'
+    name: app.conf.get('SERVER_NAME')
   });
 
   var toJson = function(obj) {

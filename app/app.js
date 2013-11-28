@@ -1,7 +1,9 @@
-var lo = require('lodash');
+var lo = require('lodash')
+  , server = require('./server');
 
-var ServerApp = function(nconf) {
+var Biodome = function(nconf) {
   var self = this;
+  self.appServer = null;
 
   // Setup
   self.conf = nconf;
@@ -10,6 +12,15 @@ var ServerApp = function(nconf) {
   self.gpio = (self.conf.get('NODE_ENV') == 'production') ?
     require('gpio') : require('../test/mocks/gpio.js');
 
+  // Lazy load server
+  self.server = function() {
+    if(!self.appServer) {
+      self.appServer = server(self);
+    }
+
+    return self.appServer;
+  };
+
   // Device finder
   self.device = function(id) {
     var dvs = lo.where(self.devices, {'id' : id });
@@ -17,4 +28,4 @@ var ServerApp = function(nconf) {
   };
 };
 
-module.exports = ServerApp;
+module.exports = Biodome;

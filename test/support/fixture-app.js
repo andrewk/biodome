@@ -1,9 +1,9 @@
-var conf = require('../../config/app.js')
-  , serverApp = require('../../app/server-app')
+var conf = require('../../config/app')
+  , biodome = require('../../app/app')
   , device = require('../../app/device')
 
 var fixtureApp = function(opts) {
-  var app = new serverApp(conf);
+  var app = new biodome(conf);
   app.devices = [
     new device(app.gpio.export(1), "switch"),
     new device(app.gpio.export(2), "pump")

@@ -2,7 +2,7 @@ var chai = require("chai")
   , sinon = require("sinon")
   , expect = chai.expect
   , c = require('../../config/app')
-  , A = require('../../app/server-app')
+  , A = require('../../app/app')
   , device = require('../../app/device')
   , mockGpio = require('../mocks/gpio');
 
