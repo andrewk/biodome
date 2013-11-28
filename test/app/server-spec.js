@@ -5,7 +5,8 @@ var chai = require("chai")
   , request = require('supertest')
   , conf = require('../../config/app')
   , app = require('../support/fixture-app.js')
-  , device = require('../../app/device.js');
+  , device = require('../../app/device.js')
+  , sensor = require('../../app/sensor.js');
 
 describe("REST API", function() {
   // lazy-loaded server makes first server-bound test look slow, so kick it off here
@@ -102,6 +103,58 @@ describe("REST API", function() {
           expect(res.body.id).to.equal(app.devices[0].id);
           expect(res.body.state).to.equal("on");
           done();
+        });
+    });
+  });
+
+  describe('GET /sensors', function() {
+    it('responds with 200ok', function(done) {
+      request(app.server())
+        .get('/sensors')
+        .expect(200, done);
+    });
+
+    it('responds with JSON resource array', function(done) {
+      request(app.server())
+        .get('/sensors')
+        .expect('Content-Type', /json/)
+        .end(function(err, res){
+          if (err) return done(err);
+
+          expect(res.body).to.be.instanceOf(Array);
+          expect(res.body).to.not.be.empty;
+          expect(res.body.length).to.be.above(0);
+          expect(res.body).to.deep.equal(
+            lo.map(app.sensors, function(d) { return d.toJson(); })
+          );
+          done()
+        });
+    });
+  });
+
+  describe('GET /sensors/:id', function() {
+    it('responds with 200ok', function(done) {
+      request(app.server())
+        .get('/sensors/'+ app.sensors[0].id)
+        .expect(200, done);
+    });
+
+    it('responds with 404 for unknown sensor', function(done) {
+      request(app.server())
+        .get('/sensors/i_am_not_real')
+        .expect(404, done);
+    });
+
+    it('responds with JSON resource', function(done) {
+      request(app.server())
+        .get('/sensors/' + app.sensors[0].id)
+        .expect('Content-Type', /json/)
+        .end(function(err, res){
+          if (err) return done(err);
+
+          expect(res.body).to.be.instanceOf(Object);
+          expect(res.body.id).to.equal(app.sensors[0].id);
+          done()
         });
     });
   });

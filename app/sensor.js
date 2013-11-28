@@ -14,7 +14,7 @@ var Sensor = Submachine.subclass(function(proto) {
   });
 
   this.onEnter('busy', function() {
-    this.updateFromSensor(); 
+    this.updateFromSensor();
     this.updateComplete();
   });
 
@@ -31,13 +31,21 @@ var Sensor = Submachine.subclass(function(proto) {
     this.events = proto.events;
   };
 
+  proto.toJson = function() {
+    return {
+      "id" : this.id,
+      "updatedAt" : this.updatedAt,
+      "state" : this.value
+    };
+  };
+
   proto.update = function(callback) {
     this.updateTransition();
     if("function" == typeof callback) callback.call(this);
   };
 
   proto.updateFromSensor = function() { };
-  
+
 });
 
 module.exports = Sensor;

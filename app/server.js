@@ -60,8 +60,27 @@ module.exports = function(app) {
     device.switch(req.body.state);
     res.send(200, device.toJson());
     return next();
+  });  
+  
+  // Sensors
+  server.get('/sensors', function(req, res, next) {
+    res.setHeader('content-type', 'application/json');
+    res.send(200, lo.map(app.sensors, toJson));
+    return next();
   });
 
+  server.get('/sensors/:id', function(req, res, next) {
+    res.setHeader('content-type', 'application/json');
+
+    var sensor = app.sensor(req.params.id);
+    if(sensor) {
+      res.send(200, sensor.toJson());
+    }
+    else {
+      res.send(404, "No sensor with ID '" + req.params.id + "'");
+    }
+    return next();
+  });
 
   return server;
 }

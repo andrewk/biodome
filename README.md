@@ -10,4 +10,7 @@ API
 GET /devices
 GET /devices/:id
 PUT /devices/:id 
+
+GET /sensors
+GET /sensors/:id
 ```
