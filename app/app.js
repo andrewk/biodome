@@ -27,6 +27,12 @@ var Biodome = function(nconf) {
     var dvs = lo.where(self.devices, {'id' : id });
     return (dvs.length == 0) ? null : dvs[0];
   };
+
+  // Sensor finder
+  self.sensor = function(id) {
+    var ss = lo.where(self.sensors, {'id' : id });
+    return (ss.length == 0) ? null : ss[0];
+  };
 };
 
 module.exports = Biodome;

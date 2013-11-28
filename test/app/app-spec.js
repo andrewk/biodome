@@ -4,6 +4,7 @@ var chai = require("chai")
   , c = require('../../config/app')
   , A = require('../../app/app')
   , device = require('../../app/device')
+  , sensor = require('../../app/sensor')
   , mockGpio = require('../mocks/gpio');
 
 describe("Biodome", function() {
@@ -24,7 +25,25 @@ describe("Biodome", function() {
     });
   });
 
-  describe('#device', function() {
+  describe('#sensor', function() {
+    it('returns sensor by id', function() {
+      var app = new A(c);
+      var s = new sensor("test");
+      app.sensors.push(s);
+
+      expect(app.sensor("test")).to.equal(s);
+    });
+
+    it('returns null for unrecognized id', function() {
+      var app = new A(c);
+      var d = new device(app.gpio.export(1), "test");
+      app.devices.push(d);
+
+      expect(app.device("does_not_exist")).to.be.null;
+    });
+  });
+
+ describe('#device', function() {
     it('returns device by id', function() {
       var app = new A(c);
       var d = new device(app.gpio.export(1), "test");
@@ -40,6 +59,5 @@ describe("Biodome", function() {
 
       expect(app.device("does_not_exist")).to.be.null;
     });
-
   });
 });

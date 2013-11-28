@@ -8,13 +8,13 @@ describe("mock-gpio", function() {
     it('should set the headerNum', function() {
       var pin = gpio.export(4);
       expect(pin.headerNum).to.equal(4);
-    }); 
+    });
 
     it('should default to direction = out', function() {
       var pin = gpio.export(4);
       expect(pin.direction).to.equal("out");
-    }); 
-    
+    });
+
     it('should set the direction', function() {
       var pin = gpio.export(4, {"direction": "in"});
       expect(pin.direction).to.equal("in");
@@ -72,7 +72,7 @@ describe("mock-gpio", function() {
       var callback = sinon.spy();
       var pin = gpio.export(1);
       pin.set(1, callback);
-      expect(callback.called).to.be.true; 
+      expect(callback.called).to.be.true;
     });
 
     it('should fire a `valueChange` event', function(done) {
