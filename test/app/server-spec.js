@@ -2,7 +2,6 @@ var chai = require("chai")
   , sinon = require("sinon")
   , expect = chai.expect
   , lo = require('lodash')
-  , restify = require('restify')
   , request = require('supertest')
   , conf = require('../../config/app')
   , app = require('../support/fixture-app.js')
