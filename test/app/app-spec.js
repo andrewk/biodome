@@ -6,7 +6,7 @@ var chai = require("chai")
   , device = require('../../app/device')
   , mockGpio = require('../mocks/gpio');
 
-describe("App", function() {
+describe("Biodome", function() {
   describe('#new', function() {
     it('uses mock GPIO in development', function() {
       var app = new A(c);
@@ -16,6 +16,11 @@ describe("App", function() {
     it('has an empty devices array', function() {
       var app = new A(c);
       expect(app.devices.length).to.equal(0);
+    });
+
+    it('has an empty sensors array', function() {
+      var app = new A(c);
+      expect(app.sensors.length).to.equal(0);
     });
   });
 

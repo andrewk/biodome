@@ -50,12 +50,13 @@ describe("mock-gpio", function() {
       expect(pin.direction).to.equal("out");
     });
 
-    it('should fire a `directionChange` event', function() {
+    it('should fire a `directionChange` event', function(done) {
       var cb = sinon.spy();
       var pin = gpio.export(1);
       pin.on("directionChange", cb);
       pin.setDirection("in");
       expect(cb.called).to.be.true;
+      done();
     });
   });
 
@@ -74,20 +75,22 @@ describe("mock-gpio", function() {
       expect(callback.called).to.be.true; 
     });
 
-    it('should fire a `valueChange` event', function() {
+    it('should fire a `valueChange` event', function(done) {
       var cb = sinon.spy();
       var pin = gpio.export(1);
       pin.on("valueChange", cb);
       pin.set(1);
       expect(cb.called).to.be.true;
+      done();
     });
 
-    it('should fire a `change` event', function() {
+    it('should fire a `change` event', function(done) {
       var cb = sinon.spy();
       var pin = gpio.export(1);
       pin.on("change", cb);
       pin.set(1);
       expect(cb.called).to.be.true;
+      done();
     });
   });
 })
