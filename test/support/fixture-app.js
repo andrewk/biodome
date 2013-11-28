@@ -6,7 +6,7 @@ var fixtureApp = function(opts) {
   var app = new serverApp(conf);
   app.devices = [
     new device(app.gpio.export(1), "switch"),
-    new device(app.gpio.export(2), "pump"),
+    new device(app.gpio.export(2), "pump")
   ];
 
   return app;
