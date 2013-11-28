@@ -43,18 +43,19 @@ describe('Sensor', function() {
     it('supports optional callback', function() {
       var s = new sensor('id')
         , cb = sinon.spy();
-
       s.update(cb);
       expect(cb.called).to.be.true;
     });
 
-    // test too fast, need to alter time
-    it.skip('updates timestamp', function() {
+    it('updates timestamp', function() {
+      clock = sinon.useFakeTimers();
       var s = new sensor('q');
       var before = s.updatedAt;
+      clock.tick(500);
       s.update();
 
       expect(s.updatedAt).to.be.above(before);
+      clock.restore();
     });
   });
 });
