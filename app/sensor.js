@@ -22,16 +22,17 @@ var Sensor = Submachine.subclass(function(proto) {
     this.updatedAt = Date.now() / 1000;
   });
 
-  proto.initialize = function(id) {
-    this.id = id;
+  proto.initialize = function(opt) {
+    this.id = opt.id;
     this.value = null;
-    this.initState("init");
     this.value = null;
     this.updatedAt = Date.now() / 1000;
     this.events = proto.events;
+    
+    this.initState("init");
   };
 
-  proto.toJson = function() {
+  proto.toJSON = function() {
     return {
       "id" : this.id,
       "updatedAt" : this.updatedAt,

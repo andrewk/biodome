@@ -36,7 +36,7 @@ describe("REST API", function() {
           expect(res.body).to.not.be.empty;
           expect(res.body.length).to.be.above(0);
           expect(res.body).to.deep.equal(
-            lo.map(app.devices, function(d) { return d.toJson(); })
+            lo.map(app.devices, function(d) { return d.toJSON(); })
           );
           done()
         });
@@ -62,47 +62,9 @@ describe("REST API", function() {
         .expect('Content-Type', /json/)
         .end(function(err, res){
           if (err) return done(err);
-
           expect(res.body).to.be.instanceOf(Object);
           expect(res.body.id).to.equal(app.devices[0].id);
           done()
-        });
-    });
-  });
-
-  describe('PUT /devices/:id', function() {
-    it('responds with 404 for unknown device', function(done) {
-      request(app.server())
-        .put('/devices/does_not_exist')
-        .send({ "id" : "does_not_exist", "state" : "on" })
-        .expect(404, done)
-    });
-
-    it('responds with 400 for unknown state', function(done) {
-      request(app.server())
-        .put('/devices/'+ app.devices[0].id)
-        .send({ "id" : app.devices[0].id, "state" : "fooqux" })
-        .expect(400, done)
-    });
-
-    it('responds with 400 for different IDs between URL & data', function(done) {
-      request(app.server())
-        .put('/devices/'+ app.devices[0].id)
-        .send({ "id" : "not_real_id", "state" : "off" })
-        .expect(400, done)
-    });
-
-    it('responds with 200 and updated device on success', function(done) {
-      app.devices[0].off();
-
-      request(app.server())
-        .put('/devices/'+ app.devices[0].id)
-        .send({ "id" : app.devices[0].id, "state" : "on" })
-        .expect(200)
-        .end(function(err, res) {
-          expect(res.body.id).to.equal(app.devices[0].id);
-          expect(res.body.state).to.equal("on");
-          done();
         });
     });
   });
@@ -125,7 +87,7 @@ describe("REST API", function() {
           expect(res.body).to.not.be.empty;
           expect(res.body.length).to.be.above(0);
           expect(res.body).to.deep.equal(
-            lo.map(app.sensors, function(d) { return d.toJson(); })
+            lo.map(app.sensors, function(d) {return d.toJSON()})
           );
           done()
         });

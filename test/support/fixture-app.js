@@ -11,8 +11,8 @@ var fixtureApp = function(opts) {
   ];
 
   app.sensors = [
-    new sensor("water-temp"),
-    new sensor("air-temp")
+    new sensor({"id":"water-temp"}),
+    new sensor({"id":"air-temp"})
   ];
 
   return app;

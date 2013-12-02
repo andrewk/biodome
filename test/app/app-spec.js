@@ -28,7 +28,7 @@ describe("Biodome", function() {
   describe('#sensor', function() {
     it('returns sensor by id', function() {
       var app = new A(c);
-      var s = new sensor("test");
+      var s = new sensor({"id":"test"});
       app.sensors.push(s);
 
       expect(app.sensor("test")).to.equal(s);

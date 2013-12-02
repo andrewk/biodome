@@ -18,9 +18,10 @@ var Device = Submachine.subclass(function(proto) {
     return this.state == state;
   };
 
-  proto.toJson = function() {
+  proto.toJSON = function() {
     return {
-      "id" : this.id,
+      "type" : "device",
+      "id"   : this.id,
       "createdAt" : this.createdAt,
       "state" : this.state
     };

@@ -6,19 +6,19 @@ var chai = require("chai")
 describe('Sensor', function() {
   describe('#initialize', function() {
     it('has an ID', function() {
-      var s = new sensor('sensor_id');
+      var s = new sensor({'id':'sensor_id'});
       expect(s.id).to.equal('sensor_id');
     });
 
     it('has a null value property', function() {
-      var s = new sensor('sensor_id');
+      var s = new sensor({'id':'sensor_id'});
       expect(s.value).to.be.null;
     });
   });
 
   describe('#update', function() {
     it('emits `busy` event', function(done) {
-      var s = new sensor('foo');
+      var s = new sensor({'id':'sensor_id'});
       var cb = sinon.spy();
       s.events.on('busy', cb);
       s.update();
@@ -27,7 +27,7 @@ describe('Sensor', function() {
     });
 
     it('transitions state to `busy`, then to `ready`', function(done) {
-      var s = new sensor('foo')
+      var s = new sensor({'id':'sensor_id'})
         , cbBusy = sinon.spy()
         , cbReady = sinon.spy()
 
@@ -41,7 +41,7 @@ describe('Sensor', function() {
     });
 
     it('supports optional callback', function() {
-      var s = new sensor('id')
+      var s = new sensor({'id':'sid'})
         , cb = sinon.spy();
       s.update(cb);
       expect(cb.called).to.be.true;
@@ -49,7 +49,7 @@ describe('Sensor', function() {
 
     it('updates timestamp', function() {
       clock = sinon.useFakeTimers();
-      var s = new sensor('q');
+      var s = new sensor({'id':'q'});
       var before = s.updatedAt;
       clock.tick(500);
       s.update();
