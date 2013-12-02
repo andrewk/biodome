@@ -14,7 +14,7 @@ module.exports = function(app) {
   // Devices
   server.get('/devices', function(req, res, next) {
     res.setHeader('content-type', 'application/json');
-    res.send(200, lo.map(app.devices, function(d) {return d.toJSON()}));
+    res.send(200, app.devices);
     return next();
   });
 
@@ -23,7 +23,7 @@ module.exports = function(app) {
 
     var device = app.device(req.params.id);
     if(device) {
-      res.send(200, device.toJSON());
+      res.send(200, device);
     }
     else {
       res.send(404, "No device with ID '" + req.params.id + "'");
@@ -34,7 +34,7 @@ module.exports = function(app) {
   // Sensors
   server.get('/sensors', function(req, res, next) {
     res.setHeader('content-type', 'application/json');
-    res.send(200, lo.map(app.sensors, function(s) {return s.toJSON()}));
+    res.send(200, app.sensors);
     return next();
   });
 
@@ -43,7 +43,7 @@ module.exports = function(app) {
 
     var sensor = app.sensor(req.params.id);
     if(sensor) {
-      res.send(200, sensor.toJSON());
+      res.send(200, sensor);
     }
     else {
       res.send(404, "No sensor with ID '" + req.params.id + "'");
