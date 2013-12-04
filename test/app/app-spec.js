@@ -3,15 +3,15 @@ var chai = require("chai")
   , expect = chai.expect
   , c = require('../../config/app')
   , A = require('../../app/app')
-  , device = require('../../app/device')
-  , sensor = require('../../app/sensor')
-  , mockGpio = require('../mocks/gpio');
+  , device = require('../blueprints/device')
+  , sensor = require('../blueprints/sensor')
+  , gpio = require('../mocks/gpio');
 
 describe("Biodome", function() {
   describe('#new', function() {
     it('uses mock GPIO in development', function() {
       var app = new A(c);
-      expect(app.gpio).to.deep.equal(mockGpio);
+      expect(app.gpio).to.deep.equal(gpio);
     });
 
     it('has an empty devices array', function() {
@@ -28,17 +28,14 @@ describe("Biodome", function() {
   describe('#sensor', function() {
     it('returns sensor by id', function() {
       var app = new A(c);
-      var s = new sensor({"id":"test"});
+      var s = sensor.make();
       app.sensors.push(s);
 
-      expect(app.sensor("test")).to.equal(s);
+      expect(app.sensor(s.id)).to.equal(s);
     });
 
     it('returns null for unrecognized id', function() {
       var app = new A(c);
-      var d = new device(app.gpio.export(1), "test");
-      app.devices.push(d);
-
       expect(app.device("does_not_exist")).to.be.null;
     });
   });
@@ -46,17 +43,14 @@ describe("Biodome", function() {
  describe('#device', function() {
     it('returns device by id', function() {
       var app = new A(c);
-      var d = new device(app.gpio.export(1), "test");
+      var d = device.make();
       app.devices.push(d);
 
-      expect(app.device("test")).to.equal(d);
+      expect(app.device(d.id)).to.equal(d);
     });
 
     it('returns null for unrecognized id', function() {
       var app = new A(c);
-      var d = new device(app.gpio.export(1), "test");
-      app.devices.push(d);
-
       expect(app.device("does_not_exist")).to.be.null;
     });
   });

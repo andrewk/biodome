@@ -6,30 +6,25 @@ var Sensor = Submachine.subclass(function(proto) {
   proto.events = new EventEmitter;
 
   this.hasStates("init", "ready", "busy", "error");
-  this.transition({ from: "*", to: "busy", on: "updateTransition"});
-  this.transition({ from: "busy", to: "ready", on: "updateComplete"});
+  this.transition({ from: "*", to: "busy", on: "markBusy"});
+  this.transition({ from: "busy", to: "ready", on: "markComplete"});
 
   this.onEnter("*", function() {
     proto.events.emit(this.state);
   });
 
-  this.onEnter('busy', function() {
-    this.updateFromSensor();
-    this.updateComplete();
-  });
-
-  this.onEnter('ready', function() {
-    this.updatedAt = Date.now() / 1000;
+  this.onEnter("ready", function() {
+    this.updatedAt = Math.floor(Date.now());
   });
 
   proto.initialize = function(opt) {
     this.id = opt.id;
-    this.value = null;
-    this.value = null;
-    this.updatedAt = Date.now() / 1000;
+    this.driver = opt.driver;
+    this.updatedAt = null;
     this.events = proto.events;
     
     this.initState("init");
+    this.update();
   };
 
   proto.toJSON = function() {
@@ -40,13 +35,14 @@ var Sensor = Submachine.subclass(function(proto) {
     };
   };
 
-  proto.update = function(callback) {
-    this.updateTransition();
-    if("function" == typeof callback) callback.call(this);
+  proto.value = function() {
+    return this.driver.value;
   };
 
-  proto.updateFromSensor = function() { };
-
+  proto.update = function(callback) {
+    this.markBusy();
+    this.driver.updateSensor(this, callback);
+  };
 });
 
 module.exports = Sensor;

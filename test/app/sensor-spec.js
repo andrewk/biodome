@@ -2,23 +2,19 @@ var chai = require("chai")
   , sinon = require("sinon")
   , expect = chai.expect
   , sensor = require("../../app/sensor")
+  , driver = require("../blueprints/driver").make()
 
 describe('Sensor', function() {
   describe('#initialize', function() {
     it('has an ID', function() {
-      var s = new sensor({'id':'sensor_id'});
+      var s = new sensor({'id':'sensor_id', "driver": driver});
       expect(s.id).to.equal('sensor_id');
-    });
-
-    it('has a null value property', function() {
-      var s = new sensor({'id':'sensor_id'});
-      expect(s.value).to.be.null;
     });
   });
 
   describe('#update', function() {
     it('emits `busy` event', function(done) {
-      var s = new sensor({'id':'sensor_id'});
+      var s = new sensor({'id':'sensor_id', "driver": driver});
       var cb = sinon.spy();
       s.events.on('busy', cb);
       s.update();
@@ -26,8 +22,21 @@ describe('Sensor', function() {
       done();
     });
 
+    it('defers sensor reading to its driver', function(done) {
+      sinon.stub(driver, "read");
+      var s = new sensor({
+        "id":"test",
+        "driver": driver
+      });
+      s.update();
+
+      expect(driver.read.called).to.be.true;
+      driver.read.restore();
+      done();
+    });
+
     it('transitions state to `busy`, then to `ready`', function(done) {
-      var s = new sensor({'id':'sensor_id'})
+      var s = new sensor({'id':'sensor_id', "driver": driver})
         , cbBusy = sinon.spy()
         , cbReady = sinon.spy()
 
@@ -40,22 +49,26 @@ describe('Sensor', function() {
       done();
     });
 
-    it('supports optional callback', function() {
-      var s = new sensor({'id':'sid'})
-        , cb = sinon.spy();
-      s.update(cb);
-      expect(cb.called).to.be.true;
-    });
-
     it('updates timestamp', function() {
       clock = sinon.useFakeTimers();
-      var s = new sensor({'id':'q'});
+      var s = new sensor({'id':'q', "driver": driver});
       var before = s.updatedAt;
       clock.tick(500);
       s.update();
 
       expect(s.updatedAt).to.be.above(before);
       clock.restore();
+    });
+
+    it('supports a callback', function(done) {
+      var s = new sensor({'id':'asdf', 'driver':driver});
+
+      var cb = function(err, sensor) {
+        expect(sensor).to.equal(s);
+        done();
+      };
+
+      s.update(cb);
     });
   });
 });

@@ -3,10 +3,7 @@ var chai = require("chai")
   , expect = chai.expect
   , lo = require('lodash')
   , request = require('supertest')
-  , conf = require('../../config/app')
-  , app = require('../support/fixture-app.js')
-  , device = require('../../app/device.js')
-  , sensor = require('../../app/sensor.js');
+  , app = require('../blueprints/app.js').make()
 
 describe("REST API", function() {
   // lazy-loaded server makes first server-bound test look slow, so kick it off here
@@ -35,9 +32,7 @@ describe("REST API", function() {
           expect(res.body).to.be.instanceOf(Array);
           expect(res.body).to.not.be.empty;
           expect(res.body.length).to.be.above(0);
-          expect(res.body).to.deep.equal(
-            lo.map(app.devices, function(d) { return d.toJSON(); })
-          );
+          expect(res.text).to.equal(JSON.stringify(app.devices));
           done()
         });
     });
@@ -82,13 +77,10 @@ describe("REST API", function() {
         .expect('Content-Type', /json/)
         .end(function(err, res){
           if (err) return done(err);
-
           expect(res.body).to.be.instanceOf(Array);
           expect(res.body).to.not.be.empty;
           expect(res.body.length).to.be.above(0);
-          expect(res.body).to.deep.equal(
-            lo.map(app.sensors, function(d) {return d.toJSON()})
-          );
+          expect(res.text).to.equal(JSON.stringify(app.sensors));
           done()
         });
     });

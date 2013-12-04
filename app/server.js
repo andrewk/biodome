@@ -30,7 +30,7 @@ module.exports = function(app) {
     }
     return next();
   });
-  
+
   // Sensors
   server.get('/sensors', function(req, res, next) {
     res.setHeader('content-type', 'application/json');

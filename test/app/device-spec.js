@@ -2,45 +2,49 @@ var chai = require("chai")
   , sinon = require("sinon")
   , expect = chai.expect
   , Device = require("../../app/device")
-  , gpio = require("../mocks/gpio");
+  , dConf = {
+      "id"    : "test_device", 
+      "gpio"  : require("../mocks/gpio").export(1)
+    };
+ 
 
 describe('Device', function() {
   describe('#initialize', function() {
     it('has a gpio pin', function(){
-      var device = new Device(gpio.export(2));
+      var device = new Device(dConf);
       expect(device.gpio).to.be.ok;
     });
 
     it('ensures its GPIO has the direction set to out', function(){
-      var device = new Device(gpio.export(1, {"direction":"in"}));
+      var device = new Device(dConf);
       expect(device.gpio.direction).to.equal("out");
     });
 
     it('has an id', function() {
-      var d = new Device(gpio.export(1), "switch");
-      expect(d.id).to.equal("switch");
+      var d = new Device(dConf);
+      expect(d.id).to.equal(dConf.id);
     });
 
     it('has a createdAt timestamp', function() {
-      var d = new Device(gpio.export(1), "switch");
+      var d = new Device(dConf);
       expect(d.createdAt).to.be.above(1);
     });
 
     it('is in the off state when first created', function(){
-      var device = new Device(gpio.export(1));
+      var device = new Device(dConf);
       expect(device.is("off")).to.be.true;
     });
   });
 
   describe('#on', function() {
     it('should set device state to "on"', function() {
-      var d = new Device(gpio.export(1));
+      var d = new Device(dConf);
       d.on();
       expect(d.is("on")).to.be.true;
     });
 
     it('should set GPIO value to 1', function() {
-      var d = new Device(gpio.export(1));
+      var d = new Device(dConf);
       d.on();
       expect(d.gpio.value).to.equal(1);
     });
@@ -48,13 +52,13 @@ describe('Device', function() {
 
   describe('#off', function() {
     it('should set device state to "off"', function() {
-      var d = new Device(gpio.export(1));
+      var d = new Device(dConf);
       d.off();
       expect(d.is("off")).to.be.true;
     });
 
     it('should set GPIO value to 0', function() {
-      var d = new Device(gpio.export(1));
+      var d = new Device(dConf);
       d.off();
       expect(d.gpio.value).to.equal(0);
     });
@@ -62,14 +66,14 @@ describe('Device', function() {
 
   describe('#switch', function() {
     it('should set device state to "off" if set to "on"', function() {
-      var d = new Device(gpio.export(1));
+      var d = new Device(dConf);
       expect(d.is("off")).to.be.true;
       d.switch("on");
       expect(d.is("on")).to.be.true;
     });
 
     it('should ignore unknown states', function() {
-      var d = new Device(gpio.export(1));
+      var d = new Device(dConf);
       expect(d.is("off")).to.be.true;
       d.switch("squirrels!");
       expect(d.is("off")).to.be.true;

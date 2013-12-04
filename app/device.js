@@ -32,13 +32,13 @@ var Device = Submachine.subclass(function(proto) {
     if (["on", "off"].indexOf(state) == -1) return;
 
     if(state == "on") this.on();
-    if(state == "off") this.off();  
+    if(state == "off") this.off();
   };
 
-  proto.initialize = function(gpio, id) {
-    this.gpio = gpio;
+  proto.initialize = function(opts) {
+    this.id = opts.id;
+    this.gpio = opts.gpio;
     if (this.gpio.direction == "in") this.gpio.setDirection("out");
-    this.id = id; 
     this.createdAt = Math.round(Date.now() / 1000);
     this.initState("off");
   };
