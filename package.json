@@ -6,10 +6,11 @@
   "license": "MIT",
   "homepage": "https://github.com/andrewk/biodome-server",
   "keywords": [
-    "raspberrypi",
     "gpio",
     "owfs",
-    "1wire"
+    "1wire",
+    "robotics",
+    "automation"
   ],
   "scripts": {
     "test" : "make test"
@@ -17,7 +18,7 @@
   "dependencies": {
     "submachine": "0.1.x",
     "gpio"      : "0.2.x",
-    "owfs"      : "0.0.x",
+    "owjs"      : "0.1.x",
     "restify"   : "2.6.x",
     "nconf"     : "0.6.x",
     "lodash"    : "2.4.x",
