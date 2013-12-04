@@ -1,34 +1,36 @@
 {
-  "name": "biodome-server",
-  "description": "Device and Sensor server with REST API",
-  "version": "0.0.1",
-  "author": "Andrew Krespanis",
-  "license": "MIT",
-  "homepage": "https://github.com/andrewk/biodome-server",
-  "keywords": [
+  "name" : "biodome-server",
+  "description" : "Device and Sensor server with REST API",
+  "version" : "0.0.1",
+  "author" : "Andrew Krespanis",
+  "license" : "MIT",
+  "homepage" : "https://github.com/andrewk/biodome-server",
+  "keywords" : [
     "gpio",
     "owfs",
     "1wire",
     "robotics",
     "automation"
   ],
-  "scripts": {
+  "scripts" : {
     "test" : "make test"
   },
-  "dependencies": {
-    "submachine": "0.1.x",
-    "gpio"      : "0.2.x",
-    "owjs"      : "0.1.x",
-    "restify"   : "2.6.x",
-    "nconf"     : "0.6.x",
-    "lodash"    : "2.4.x",
-    "mocha"     : "1.14.x",
-    "chai"      : "1.8.x",
-    "sinon"     : "1.7.x",
+  "dependencies" : {
+    "chai" : "1.8.x",
+    "gpio" : "0.2.x",
+    "lodash" : "2.4.x",
+    "mocha" : "1.14.x",
+    "nconf" : "0.6.x",
+    "owjs" : "0.1.x",
+    "restify" : "2.6.x",
+    "sinon" : "1.7.x",
+    "socket.io" : "0.9.x",
+    "socket.io-client" : "0.9.x",
+    "submachine" : "0.1.x",
     "supertest" : "0.8.x"
   },
   "repository": {
-    "type": "git",
-    "url": "https://github.com/andrewk/biodome-server.git"
+    "type" : "git",
+    "url" : "https://github.com/andrewk/biodome-server.git"
   }
 }
