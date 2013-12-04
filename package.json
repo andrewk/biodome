@@ -7,8 +7,13 @@
   "homepage": "https://github.com/andrewk/biodome-server",
   "keywords": [
     "raspberrypi",
-    "gpio"
+    "gpio",
+    "owfs",
+    "1wire"
   ],
+  "scripts": {
+    "test" : "make test"
+  },
   "dependencies": {
     "submachine": "0.1.x",
     "gpio"      : "0.2.x",
