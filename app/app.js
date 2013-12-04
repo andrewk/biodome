@@ -1,5 +1,7 @@
 var lo = require('lodash')
-  , server = require('./server');
+  , util = require('util')
+  , EventEmitter = require('events').EventEmitter
+  , server = require('./server')
 
 var Biodome = function(nconf) {
   var self = this;
@@ -22,6 +24,15 @@ var Biodome = function(nconf) {
     return self.appServer;
   };
 
+  self.addSensor = function(sensor) {
+    // relay new readings
+    sensor.events.on('update', function(data) {
+      self.emit('sensor update', data);
+    });
+
+    this.sensors.push(sensor);
+  };
+
   // Device finder
   self.device = function(id) {
     var dvs = lo.where(self.devices, {'id' : id });
@@ -34,5 +45,7 @@ var Biodome = function(nconf) {
     return (ss.length == 0) ? null : ss[0];
   };
 };
+
+util.inherits(Biodome, EventEmitter);
 
 module.exports = Biodome;

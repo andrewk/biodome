@@ -26,6 +26,7 @@
     "sinon" : "1.7.x",
     "socket.io" : "0.9.x",
     "socket.io-client" : "0.9.x",
+    "socket.io-rpc" : "0.3.x",
     "submachine" : "0.1.x",
     "supertest" : "0.8.x"
   },

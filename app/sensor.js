@@ -3,28 +3,26 @@ var util = require('util')
   , Submachine = require("submachine").Submachine;
 
 var Sensor = Submachine.subclass(function(proto) {
-  proto.events = new EventEmitter;
-
   this.hasStates("init", "ready", "busy", "error");
   this.transition({ from: "*", to: "busy", on: "markBusy"});
   this.transition({ from: "busy", to: "ready", on: "markComplete"});
 
   this.onEnter("*", function() {
-    proto.events.emit(this.state);
+    this.events.emit(this.state, this.toJSON());
   });
 
   this.onEnter("ready", function() {
     this.updatedAt = Math.floor(Date.now());
+    this.events.emit('update', this.toJSON());
   });
 
   proto.initialize = function(opt) {
     this.id = opt.id;
     this.driver = opt.driver;
     this.updatedAt = null;
-    this.events = proto.events;
+    this.events = new EventEmitter;
     
     this.initState("init");
-    this.update();
   };
 
   proto.toJSON = function() {

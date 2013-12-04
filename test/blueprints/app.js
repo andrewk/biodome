@@ -9,8 +9,8 @@ module.exports.make = function() {
 
   app.devices.push(device.make());
   app.devices.push(device.make());
-  app.sensors.push(sensor.make());
-  app.sensors.push(sensor.make());
+  app.addSensor(sensor.make());
+  app.addSensor(sensor.make());
 
   return app;
 }
