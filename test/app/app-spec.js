@@ -29,7 +29,7 @@ describe("Biodome", function() {
     it('returns sensor by id', function() {
       var app = new A(c);
       var s = sensor.make();
-      app.sensors.push(s);
+      app.addSensor(s);
 
       expect(app.sensor(s.id)).to.equal(s);
     });
@@ -44,7 +44,7 @@ describe("Biodome", function() {
     it('returns device by id', function() {
       var app = new A(c);
       var d = device.make();
-      app.devices.push(d);
+      app.addDevice(d);
 
       expect(app.device(d.id)).to.equal(d);
     });

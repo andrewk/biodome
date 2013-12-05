@@ -24,6 +24,14 @@ var Biodome = function(nconf) {
     return self.appServer;
   };
 
+  self.addDevice = function(device) {
+    device.events.on('update', function(data) {
+      self.emit('device update', data);
+    });
+
+    this.devices.push(device);
+  };
+
   self.addSensor = function(sensor) {
     // relay new readings
     sensor.events.on('update', function(data) {

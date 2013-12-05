@@ -7,8 +7,8 @@ module.exports = appClass;
 module.exports.make = function() {
   var app = new appClass(conf);
 
-  app.devices.push(device.make());
-  app.devices.push(device.make());
+  app.addDevice(device.make());
+  app.addDevice(device.make());
   app.addSensor(sensor.make());
   app.addSensor(sensor.make());
 

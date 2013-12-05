@@ -7,16 +7,17 @@ var chai = require("chai")
 
 var options = {
   'transports': ['websocket'],
-  'force new connection': true
+  'force new connection': true,
+  'level' : 0
 };
+
+app.server().listen(app.conf.get('PORT'));
+var server = new SocketServer(app)
 
 describe('SocketServer', function() {
   describe('connection', function() {
     it('broadcasts sensor updates', function(done) {
-      app.server().listen(app.conf.get('PORT'));
-      var server = new SocketServer(app)
       var client = io.connect(app.server().url, options);
-
       client.on('sensor update', function(sensor) {
         expect(sensor.id).to.equal(app.sensors[0].id)
         done();
@@ -27,6 +28,17 @@ describe('SocketServer', function() {
       });
     });
 
-    it('broadcasts device changes');
+    it('broadcasts device changes', function(done) {
+      var client = io.connect(app.server().url, options);
+      client.on('device update', function(device) {
+        expect(device.id).to.equal(app.devices[0].id)
+        done();
+      });
+      
+      client.on('connect', function() {
+        app.devices[0].on()
+      });
+    
+    });
   });
 });
