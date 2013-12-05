@@ -15,7 +15,6 @@ var SocketServer = function(app) {
     // broadcast device changes
     app.on('device update', function (data) {
       socket.emit('device update', data);
-
     });
   });
 }
