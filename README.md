@@ -1,10 +1,8 @@
-# node-biodome
+# node-biodome  [![Build Status](https://secure.travis-ci.org/andrewk/node-biodome.png?branch=master)](http://travis-ci.org/andrewk/node-biodome)
 
 __JavaScript Framework for Automation and Sensor Systems__ 
 
 Version 0.0.0 - in active development, not yet fully fleshed out
-
-[![Build Status](https://secure.travis-ci.org/andrewk/node-biodome.png?branch=master)](http://travis-ci.org/andrewk/node-biodome)
 
   * [Sensors](#sensors)
   * [Devices](#devices)
@@ -16,9 +14,8 @@ Version 0.0.0 - in active development, not yet fully fleshed out
   * [License](#license)
 
 ## Overview
-This is the core service, providing hardware interaction. It does not implement scheduling, environment compensation, or other use-case specific tools - these will be built as seperate services.
+This is the core service, providing hardware interaction. It does not implement scheduling, environment compensation, or other use-case specific tools - these will be built as seperate services. Goals include:
 
-### Goals
   * Ease of adoption by people looking to assemble home/environment/industrial automation and monitoring systems.
   * Service Oriented Architecure. Allow for deployment across machines where feasible.
   * Prefer low-cost, highly replacable hardware.
@@ -26,7 +23,7 @@ This is the core service, providing hardware interaction. It does not implement 
 
 <a name="sensors"></a>
 ## Sensors
-A Sensor reads a value, which is provided by its Driver. The Driver could be talking to I2C, 1-wire (owfs), UART, TCP, HTTP, shell calls; whatever you can access from node. Existing Drivers are in [lib/drivers](../blob/master/lib/drivers).
+A Sensor reads a value, which is provided by its Driver. Sensors are INPUT. The Driver could be talking to I2C, 1-wire (owfs), UART, TCP, HTTP, shell calls; whatever you can access from node. Existing Drivers are in [lib/drivers](../blob/master/lib/drivers).
 
 The Driver instance is injected into the Sensor at instantiation:
 
@@ -81,9 +78,8 @@ var OwserverDriver = function(deviceAddress) {
 OwserverDriver.prototype = new Base;
 ```
 
-<a name="devices"></a>
 ## Devices
-A Device is hardware which can be fed input such as relays, motors, cameras, etc. Device switching is currently by GPIO only. Rewriting hardware support to use Drivers is a high priority.
+A Device is hardware which can be fed input such as relays, motors, etc. Devices are OUTPUT. Device switching is currently by GPIO only. Rewriting hardware support to use Drivers is a high priority.
 
 ```javascript
 var pump = new Device({
@@ -91,8 +87,15 @@ var pump = new Device({
   "gpio": app.gpio.export(2) // TODO
 }))
 ```
+### States and Events
+Device states:
 
-<a name="app"></a>
+  * `on` : Device is activated
+  * `off`: Device is de-activated
+  * `error` : communication with driver has failed (failure detection not yet implemented)
+
+Devices possess an EventEmitter instance as their `events` property. All state changes are emitted.
+
 ## App
 
 The App is the hub for accessing Devices and Sensors. It also echos events from its Sensors and Devices, decoupling the services watching from the hardware under observation.
@@ -122,7 +125,6 @@ Socket broadcast events:
 'device update' - JSON representation of an updated Device
 ```
 
-<a name="socket-rpc"></a>
 ### Socket RPC
 
 RPC API for JavaScript via WebSockets. Not yet implemented.
