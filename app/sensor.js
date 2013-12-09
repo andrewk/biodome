@@ -5,7 +5,7 @@ var util = require('util')
 var Sensor = Submachine.subclass(function(proto) {
   this.hasStates("init", "ready", "busy", "error");
   this.transition({ from: "*", to: "busy", on: "markBusy"});
-  this.transition({ from: "busy", to: "ready", on: "markComplete"});
+  this.transition({ from: "busy", to: "ready", on: "driverUpdated"});
 
   this.onEnter("*", function() {
     this.events.emit(this.state, this.toJSON());
@@ -39,7 +39,7 @@ var Sensor = Submachine.subclass(function(proto) {
 
   proto.update = function(callback) {
     this.markBusy();
-    this.driver.updateSensor(this, callback);
+    this.driver.update(this, callback);
   };
 });
 
