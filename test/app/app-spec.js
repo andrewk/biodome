@@ -9,11 +9,6 @@ var chai = require("chai")
 
 describe("Biodome", function() {
   describe('#new', function() {
-    it('uses mock GPIO in development', function() {
-      var app = new A(c);
-      expect(app.gpio).to.deep.equal(gpio);
-    });
-
     it('has an empty devices array', function() {
       var app = new A(c);
       expect(app.devices.length).to.equal(0);

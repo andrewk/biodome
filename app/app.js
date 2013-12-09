@@ -12,9 +12,6 @@ var Biodome = function(nconf) {
   self.devices = [];
   self.sensors = [];
 
-  self.gpio = (self.conf.get('NODE_ENV') == 'production') ?
-    require('gpio') : require('../test/mocks/gpio.js');
-
   // Lazy load server
   self.server = function() {
     if(!self.appServer) {
