@@ -2,10 +2,12 @@ var Submachine = require("submachine").Submachine
   , EventEmitter = require('events').EventEmitter
 
 var Device = Submachine.subclass(function(proto) {
-  this.hasStates("on", "off", "error");
-  this.transition({ from: "on",  to: "off", on: "off" });
-  this.transition({ from: "off", to: "on",  on: "on" });
+  this.hasStates("on", "off", "error", "busy", "ready");
+  this.transition({ from: "*",  to: "off", on: "off" });
+  this.transition({ from: "*", to: "on",  on: "on" });
   this.transition({ from: "*", to: "error",  on: "throwError" });
+  this.transition({ from: "*", to: "busy", on: "markBusy"});
+  this.transition({ from: "busy",  to: "ready", on: "driverUpdated" });
 
   this.onEnter("*", function() {
     this.events.emit(this.state, this.toJSON());
@@ -13,11 +15,9 @@ var Device = Submachine.subclass(function(proto) {
   });
 
   this.onEnter("off", function() {
-    this.gpio.set(0);
   });
 
   this.onEnter("on", function() {
-    this.gpio.set(1);
   });
 
   proto.is = function(state) {
@@ -33,21 +33,28 @@ var Device = Submachine.subclass(function(proto) {
     };
   };
 
-  proto.switch = function(state) {
+  proto.switch = function(state, callback) {
+    var self = this;
     if (state == this.state) return;
     if (["on", "off"].indexOf(state) == -1) return;
 
-    if(state == "on") this.on();
-    if(state == "off") this.off();
+    this.driver.send(
+      state == "on" ? 1 : 0,
+      this,
+      function switchCallback(err) {
+        if(state == "on") self.on();
+        if(state == "off") self.off();
+        if("function" == typeof callback) callback(err);
+      }
+    );
   };
 
   proto.initialize = function(opts) {
     this.id = opts.id;
+    this.driver = opts.driver;
     this.events = new EventEmitter;
-    this.gpio = opts.gpio;
-    if (this.gpio.direction == "in") this.gpio.setDirection("out");
     this.createdAt = Math.round(Date.now() / 1000);
-    this.initState("off");
+    this.initState("ready");
   };
 });
 
