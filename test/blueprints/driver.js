@@ -2,13 +2,13 @@ var Base = require('../../lib/drivers/base')
 
 var DummyDriver = function() {
   this.read = function(callback) {
-    this.value = Math.floor(Math.random() * 100);
+    this.value = this.value ||  Math.floor(Math.random() * 100);
     callback(null);
   }
 
   this.write = function(value, callback) {
     this.value = value;
-    callback(null);
+    if("function" == typeof callback) callback(null);
   }
 };
 

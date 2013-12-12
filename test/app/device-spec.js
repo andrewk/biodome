@@ -71,5 +71,17 @@ describe('Device', function() {
     });
   });
 
+  describe('#inheritStateFromDriver', function() {
+    it('turns on if the driver value is 1', function(done) {
+      dConf.driver.write(1);
+      var d = new Device(dConf);
+      expect(d.is("ready")).to.be.true;
+      d.inheritStateFromDriver(function() {
+        expect(d.is("on")).to.be.true;
+        done();
+      });
+    });
+  });
+
 });
 

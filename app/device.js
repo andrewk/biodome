@@ -49,6 +49,14 @@ var Device = Submachine.subclass(function(proto) {
     );
   };
 
+  proto.inheritStateFromDriver = function(callback) {
+    var self = this;
+    this.driver.read(function() {
+      self.driver.value == 1 ? self.switch("on") : self.switch("off");
+      if("function" == typeof callback) callback(null, self);
+    });
+  };
+
   proto.initialize = function(opts) {
     this.id = opts.id;
     this.driver = opts.driver;
