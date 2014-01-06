@@ -17,28 +17,32 @@ var server = new SocketServer(app)
 describe('SocketServer', function() {
   describe('connection', function() {
     it('broadcasts sensor updates', function(done) {
-      var client = io.connect(app.server().url, options);
+      var client = io.connect(app.server().url, options)
+        , doneCalled = false;
       client.on('sensor update', function(sensor) {
         expect(sensor.id).to.equal(app.sensors[0].id)
-        done();
+        if (!doneCalled) done();
+        doneCalled = true;
       });
-      
+
       client.on('connect', function() {
         app.sensors[0].update()
       });
     });
 
     it('broadcasts device changes', function(done) {
-      var client = io.connect(app.server().url, options);
+      var client = io.connect(app.server().url, options)
+        , doneCalled = false;
       client.on('device update', function(device) {
         expect(device.id).to.equal(app.devices[0].id)
-        done();
+        if(!doneCalled) done();
+        doneCalled = true;
       });
-      
+
       client.on('connect', function() {
         app.devices[0].on()
       });
-    
+
     });
   });
 });

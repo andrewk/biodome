@@ -1,46 +1,47 @@
 var util = require('util')
   , EventEmitter = require('events').EventEmitter
-  , Submachine = require("submachine").Submachine;
+  , Stateful = require('./stateful');
 
-var Sensor = Submachine.subclass(function(proto) {
-  this.hasStates("init", "ready", "busy", "error");
-  this.transition({ from: "*", to: "busy", on: "markBusy"});
-  this.transition({ from: "busy", to: "ready", on: "driverUpdated"});
+var Sensor = function(opt) {
+  var self = this;
 
-  this.onEnter("*", function() {
-    this.events.emit(this.state, this.toJSON());
-  });
+  this.id = opt.id;
+  this.driver = opt.driver;
+  this.updatedAt = null;
+  this.events = new EventEmitter;
+  this.state = "init";
 
-  this.onEnter("ready", function() {
-    this.updatedAt = Math.floor(Date.now());
-    this.events.emit('update', this.toJSON());
-  });
-
-  proto.initialize = function(opt) {
-    this.id = opt.id;
-    this.driver = opt.driver;
-    this.updatedAt = null;
-    this.events = new EventEmitter;
-    
-    this.initState("init");
-  };
-
-  proto.toJSON = function() {
+  this.toJSON = function() {
     return {
       "id" : this.id,
       "updatedAt" : this.updatedAt,
-      "state" : this.value
+      "state" : this.state,
+      "value" : this.value()
     };
   };
 
-  proto.value = function() {
+  this.value = function() {
     return this.driver.value;
   };
 
-  proto.update = function(callback) {
-    this.markBusy();
-    this.driver.update(this, callback);
+  this.stateChanged = function() {
+    this.events.emit(this.state, this.toJSON());
+    this.events.emit("update", this.toJSON());
   };
-});
+
+  this.driverUpdated = function() {
+    this.setState("ready");
+  };
+
+  this.update = function(callback) {
+    this.setState("busy");
+    this.driver.update(this, function() {
+      self.updatedAt = self.timestamp(); 
+      if("function" == typeof callback) callback(null, self);
+    });
+  };
+};
+
+Sensor.prototype = new Stateful;
 
 module.exports = Sensor;

@@ -1,30 +1,19 @@
-var Submachine = require("submachine").Submachine
-  , EventEmitter = require('events').EventEmitter
+var EventEmitter = require('events').EventEmitter
+  , Stateful = require('./stateful');
 
-var Device = Submachine.subclass(function(proto) {
-  this.hasStates("on", "off", "error", "busy", "ready");
-  this.transition({ from: "*",  to: "off", on: "off" });
-  this.transition({ from: "*", to: "on",  on: "on" });
-  this.transition({ from: "*", to: "error",  on: "throwError" });
-  this.transition({ from: "*", to: "busy", on: "markBusy"});
-  this.transition({ from: "busy",  to: "ready", on: "driverUpdated" });
+var Device = function(opts) {
+  var self = this;
+  this.id = opts.id;
+  this.driver = opts.driver;
+  this.events = new EventEmitter;
+  this.createdAt = Math.round(Date.now() / 1000);
+  this.state = "init";
 
-  this.onEnter("*", function() {
-    this.events.emit(this.state, this.toJSON());
-    this.events.emit('update', this.toJSON());
-  });
-
-  this.onEnter("off", function() {
-  });
-
-  this.onEnter("on", function() {
-  });
-
-  proto.is = function(state) {
+  this.isState = function(state) {
     return this.state == state;
   };
 
-  proto.toJSON = function() {
+  this.toJSON = function() {
     return {
       "type" : "device",
       "id"   : this.id,
@@ -33,8 +22,24 @@ var Device = Submachine.subclass(function(proto) {
     };
   };
 
-  proto.switch = function(state, callback) {
-    var self = this;
+  this.driverUpdated = function() {
+    this.setState("ready");
+  };
+
+  this.on = function() {
+    this.switch("on");
+  };
+  
+  this.stateChanged = function() {
+    this.events.emit(this.state, this.toJSON());
+    this.events.emit("update", this.toJSON());
+  };
+
+  this.off = function() {
+    this.switch("off");
+  };
+
+  this.switch = function(state, callback) {
     if (state == this.state) return;
     if (["on", "off"].indexOf(state) == -1) return;
 
@@ -42,28 +47,20 @@ var Device = Submachine.subclass(function(proto) {
       state == "on" ? 1 : 0,
       this,
       function switchCallback(err) {
-        if(state == "on") self.on();
-        if(state == "off") self.off();
+        self.setState(state);
         if("function" == typeof callback) callback(err);
       }
     );
   };
 
-  proto.inheritStateFromDriver = function(callback) {
-    var self = this;
+  this.inheritStateFromDriver = function(callback) {
     this.driver.read(function() {
       self.driver.value == 1 ? self.switch("on") : self.switch("off");
       if("function" == typeof callback) callback(null, self);
     });
   };
+};
 
-  proto.initialize = function(opts) {
-    this.id = opts.id;
-    this.driver = opts.driver;
-    this.events = new EventEmitter;
-    this.createdAt = Math.round(Date.now() / 1000);
-    this.initState("ready");
-  };
-});
+Device.prototype = new Stateful;
 
 module.exports = Device;

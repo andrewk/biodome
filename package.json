@@ -17,6 +17,7 @@
   },
   "dependencies" : {
     "chai" : "1.8.x",
+    "es6-promise" : "0.1.x",
     "gpio" : "0.2.x",
     "lodash" : "2.4.x",
     "mocha" : "1.14.x",

@@ -25,25 +25,25 @@ describe('Device', function() {
       expect(d.createdAt).to.be.above(1);
     });
 
-    it('is in the ready state when first created', function(){
+    it('is in the init state when first created', function(){
       var device = new Device(dConf);
-      expect(device.is("ready")).to.be.true;
+      expect(device.isState("init")).to.be.true;
     });
   });
 
   describe('#on', function() {
     it('should set device state to "on"', function() {
       var d = new Device(dConf);
-      d.switch("on");
-      expect(d.is("on")).to.be.true;
+      d.on();
+      expect(d.isState("on")).to.be.true;
     });
   });
 
   describe('#off', function() {
     it('should set device state to "off"', function() {
       var d = new Device(dConf);
-      d.switch("off");
-      expect(d.is("off")).to.be.true;
+      d.off();
+      expect(d.isState("off")).to.be.true;
     });
 
     it('writes 0 to the driver', function() {
@@ -57,17 +57,17 @@ describe('Device', function() {
     it('should set device state to "off" if set to "on"', function() {
       var d = new Device(dConf);
       d.switch("off");
-      expect(d.is("off")).to.be.true;
+      expect(d.isState("off")).to.be.true;
       d.switch("on");
-      expect(d.is("on")).to.be.true;
+      expect(d.isState("on")).to.be.true;
     });
 
     it('should ignore unknown states', function() {
       var d = new Device(dConf);
       d.switch("off");
-      expect(d.is("off")).to.be.true;
+      expect(d.isState("off")).to.be.true;
       d.switch("squirrels!");
-      expect(d.is("off")).to.be.true;
+      expect(d.isState("off")).to.be.true;
     });
   });
 
@@ -75,9 +75,9 @@ describe('Device', function() {
     it('turns on if the driver value is 1', function(done) {
       dConf.driver.write(1);
       var d = new Device(dConf);
-      expect(d.is("ready")).to.be.true;
+      expect(d.isState("init")).to.be.true;
       d.inheritStateFromDriver(function() {
-        expect(d.is("on")).to.be.true;
+        expect(d.isState("on")).to.be.true;
         done();
       });
     });
