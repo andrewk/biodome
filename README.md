@@ -1,3 +1,5 @@
+<img src="../blob/master/assets/logo-web.png">
+
 # node-biodome  [![Build Status](https://secure.travis-ci.org/andrewk/node-biodome.png?branch=master)](http://travis-ci.org/andrewk/node-biodome)
 
 __JavaScript Framework for Automation and Sensor Systems__ 
@@ -79,12 +81,12 @@ OwserverDriver.prototype = new Base;
 ```
 
 ## Devices
-A Device is hardware which can be fed input such as relays, motors, etc. Devices are OUTPUT. Device switching is currently by GPIO only. Rewriting hardware support to use Drivers is a high priority.
+A Device is hardware which can be fed input such as relays, motors, etc. Devices are OUTPUT.
 
 ```javascript
 var pump = new Device({
   "id"  : "water_pump",
-  "gpio": app.gpio.export(2) // TODO
+  "gpio": new GpioDriver(11)
 }))
 ```
 ### States and Events

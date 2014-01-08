@@ -13,28 +13,6 @@ describe('Sensor', function() {
   });
 
   describe('#update', function() {
-    it('emits `busy` event', function(done) {
-      var s = new sensor({'id':'sensor_id', "driver": driver});
-      var cb = sinon.spy();
-      s.events.on('busy', cb);
-      s.update();
-      expect(cb.called).to.be.true;
-      done();
-    });
-
-    it('defers sensor reading to its driver', function(done) {
-      sinon.stub(driver, "read");
-      var s = new sensor({
-        "id":"test",
-        "driver": driver
-      });
-      s.update();
-
-      expect(driver.read.called).to.be.true;
-      driver.read.restore();
-      done();
-    });
-
     it('transitions state to `busy`, then to `ready`', function(done) {
       var s = new sensor({'id':'sensor_id', "driver": driver})
         , cbBusy = sinon.spy()
