@@ -1,4 +1,4 @@
-<img src="../raw/master/assets/logo-web.png">
+<img src="https://github.com/andrewk/node-biodome/raw/master/assets/logo-web.png">
 
 # node-biodome  [![Build Status](https://secure.travis-ci.org/andrewk/node-biodome.png?branch=master)](http://travis-ci.org/andrewk/node-biodome)
 
