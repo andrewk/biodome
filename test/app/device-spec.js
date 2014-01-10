@@ -23,10 +23,12 @@ describe('Device', function() {
   });
 
   describe('#on', function() {
-    it('should set device state to "on"', function() {
+    it('should set device state to "on"', function(done) {
       var d = new Device(dConf);
-      d.on();
-      expect(d.isState("on")).to.be.true;
+      d.on(function(err, dd) {
+        expect(dd.isState("on")).to.be.true;
+        done();
+      });
     });
   });
 
@@ -37,12 +39,6 @@ describe('Device', function() {
         expect(d.isState("off")).to.be.true;
         done();
       });
-    });
-
-    it('writes 0 to the driver', function() {
-      var d = new Device(dConf);
-      d.off();
-      expect(d.driver.value).to.equal(0);
     });
   });
 

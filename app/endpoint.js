@@ -5,6 +5,7 @@ var EventEmitter = require('events').EventEmitter
  * Common functionality shared between Devices and Sensors
  */
 function Endpoint() {
+  EventEmitter.call(this);
   this.state = null;
   this.error = null;
   this.updatedAt = null;
@@ -34,6 +35,7 @@ Endpoint.prototype.toJSON = function() {
 Endpoint.prototype.setState = function(newState) {
   if (this.state == newState) return;
   this.state = newState;
+  this.emit(this.state, this);
   this.updatedNow();
 };
 

@@ -23,10 +23,11 @@ describe('Sensor', function() {
       s.on('busy', cbBusy);
       s.on('ready', cbReady);
 
-      s.update();
-      expect(cbBusy.called).to.be.true;
-      expect(cbReady.called).to.be.true;
-      done();
+      s.update(function(err, sensorReturn) {
+        expect(cbBusy.called).to.be.true;
+        expect(cbReady.called).to.be.true;
+        done();
+      });
     });
 
     it('updates timestamp', function() {
