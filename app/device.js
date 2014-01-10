@@ -1,66 +1,34 @@
-var EventEmitter = require('events').EventEmitter
-  , Stateful = require('./stateful');
+var Endpoint = require('./endpoint')
+  , util = require('util')
+  , EventEmitter = require('events').EventEmitter;
 
-var Device = function(opts) {
-  var self = this;
+function Device(opts) {
+  Endpoint.call(this);
   this.id = opts.id;
   this.driver = opts.driver;
-  this.events = new EventEmitter;
-  this.createdAt = Math.round(Date.now() / 1000);
-  this.state = "init";
-
-  this.isState = function(state) {
-    return this.state == state;
-  };
-
-  this.toJSON = function() {
-    return {
-      "type" : "device",
-      "id"   : this.id,
-      "createdAt" : this.createdAt,
-      "state" : this.state
-    };
-  };
-
-  this.driverUpdated = function() {
-    this.setState("ready");
-  };
-
-  this.on = function() {
-    this.switch("on");
-  };
-  
-  this.stateChanged = function() {
-    this.events.emit(this.state, this.toJSON());
-    this.events.emit("update", this.toJSON());
-  };
-
-  this.off = function() {
-    this.switch("off");
-  };
-
-  this.switch = function(state, callback) {
-    if (state == this.state) return;
-    if (["on", "off"].indexOf(state) == -1) return;
-
-    this.driver.send(
-      state == "on" ? 1 : 0,
-      this,
-      function switchCallback(err) {
-        self.setState(state);
-        if("function" == typeof callback) callback(err);
-      }
-    );
-  };
-
-  this.inheritStateFromDriver = function(callback) {
-    this.driver.read(function() {
-      self.driver.value == 1 ? self.switch("on") : self.switch("off");
-      if("function" == typeof callback) callback(null, self);
-    });
-  };
+  this.wireEvents();
 };
 
-Device.prototype = new Stateful;
+util.inherits(Device, Endpoint);
+
+Device.prototype.on = function(next) {
+  this.switch("on", next);
+};
+
+Device.prototype.off = function(next) {
+  this.switch("off", next);
+};
+
+Device.prototype.switch = function(state, next) {
+  if (state == this.state) return;
+  if (["on", "off"].indexOf(state) == -1) return;
+  this.value = (state == "on") ? 1 : 0,
+  this.setState(state);
+  this.driver.toHardware(this, next);
+};
+
+Device.prototype.wireEvents = function() {
+  
+}
 
 module.exports = Device;

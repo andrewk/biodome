@@ -1,8 +1,7 @@
 var gpio = require('gpio')
   , conf = require('../../config/app')
-  , base = require('./base');
 
-var GpioDriver = function(pinNumber, direction, callback) {
+var GpioIO = function(pinNumber, direction, callback) {
   var self = this;
   self.hardware = gpio.export(
     pinNumber, 
@@ -13,7 +12,7 @@ var GpioDriver = function(pinNumber, direction, callback) {
   );
 
   this.read = function(callback) {
-    // GPIO uses a filewather to update its value
+    // GPIO uses a filewatcher to update its value
     if(self.hardware.direction == "in") {
       callback(null);
     }
@@ -30,6 +29,4 @@ var GpioDriver = function(pinNumber, direction, callback) {
   }
 };
 
-GpioDriver.prototype = new base;
-
-module.exports = GpioDriver;
+module.exports = GpioIO;
