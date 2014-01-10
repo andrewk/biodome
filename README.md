@@ -1,11 +1,11 @@
 <img src="../blob/master/assets/logo-web.png">
 
-# node-biodome  [![Build Status](https://secure.travis-ci.org/andrewk/node-biodome.png?branch=master)](http://travis-ci.org/andrewk/node-biodome)
+# biodome [![Build Status](https://secure.travis-ci.org/andrewk/biodome.png?branch=master)](http://travis-ci.org/andrewk/biodome)
+## home automation you can live with
 
-__JavaScript Framework for Automation and Sensor Systems__ 
+In active development, API under regular shift
 
-Version 0.0.0 - in active development, not yet fully fleshed out
-
+  * [Overview](#overview)
   * [Sensors](#sensors)
   * [Devices](#devices)
   * [Application](#app)
@@ -16,7 +16,7 @@ Version 0.0.0 - in active development, not yet fully fleshed out
   * [License](#license)
 
 ## Overview
-This is the core service, providing hardware interaction. It does not implement scheduling, environment compensation, or other use-case specific tools - these will be built as seperate services. Goals include:
+This is the core service, providing hardware (aka `Endpoint`) interaction. It does not implement scheduling, environment compensation, or other use-case specific tools - these will be built as seperate services. Goals include:
 
   * Ease of adoption by people looking to assemble home/environment/industrial automation and monitoring systems.
   * Service Oriented Architecure. Allow for deployment across machines where feasible.
@@ -25,82 +25,55 @@ This is the core service, providing hardware interaction. It does not implement 
 
 <a name="sensors"></a>
 ## Sensors
-A Sensor reads a value, which is provided by its Driver. Sensors are INPUT. The Driver could be talking to I2C, 1-wire (owfs), UART, TCP, HTTP, shell calls; whatever you can access from node. Existing Drivers are in [lib/drivers](../blob/master/lib/drivers).
+A Sensor reads a value, which is provided by its IO, via the driver. Sensors are INPUT. The IO could be I2C, 1-wire (owfs), UART, TCP, HTTP, shell calls; whatever you can access from node. Existing IO implementations are in [app/io](../blob/master/app/io), with the primary design goal being ease of adding new IO implementations.
 
 The Driver instance is injected into the Sensor at instantiation:
 
 ```javascript
 var temperature =  new Sensor({
-  "id" : "temp",
-  "driver" : new OwserverDriver('/10.E89C8A020800/temperature')
+  "id" : "Outside Temperature",
+  "driver" : new Driver(new OwserverIO('/10.E89C8A020800/temperature'))
 }));
 
-temperature.update(function(err, sensorJson) {
-  console.log(sensorJson);
+temperature.update(function(err, sensor) {
+  console.log(sensor.value);
 });
 ```
 
 ### States and Events
 Sensors states:
 
-  * `init` : newly-created sensor in the process of being setup
   * `busy` : sensor is awaiting response of asynchronous update from its driver
   * `ready`: update complete
   * `error`: communication with driver has failed (failure detection not yet implemented)
 
-Sensors possess an EventEmitter instance as their `events` property. All state changes are emitted, along with an `update` event whenever a new sensor reading is available.
-
-### Protocol/Hardware Support
-To add support for different sensors, your driver needs to implement a `read` method and inherit from `BaseDriver`. Updating happens asyncronously, with a JSON representation of the updated sensor provided to the callback. Drivers are also the place to enforce sensor hardware access limitations, eg:
-
- * limiting the frequency of update for a humidity sensor so it doesn't burn out.
- * caching HTTP calls if you want to scrape multiple signals from a single HTML page.
-
-The expectation is that the Driver will return its `value` from the previous reading, unless
-Here is a simple example Driver, reading Dallas 1-wire sensors from owserver:
-
-```javascript
-var owjs = require('owjs')
-  , conf = require('../../config/app')
-  , Base = require('./base');
-
-var OwserverDriver = function(deviceAddress) {
-  var self = this;
-  self.deviceAddress = deviceAddress;
-  self.client = new owjs.Client({host: conf.get('owserver_ip')});
-
-  this.read = function(callback) {
-    self.client.read(self.deviceAddress, function(err, result) {
-      self.value = result;
-      callback(err);
-    });
-  }
-};
-
-OwserverDriver.prototype = new Base;
-```
+#### Sensors Events:
+  __TODO__: Event API shifting too quickly right now...
 
 ## Devices
-A Device is hardware which can be fed input such as relays, motors, etc. Devices are OUTPUT.
+A Device is hardware which can be fed input such as relays, motors, etc. Devices are OUTPUT endpoints.
 
 ```javascript
 var pump = new Device({
   "id"  : "water_pump",
-  "gpio": new GpioDriver(11)
+  "gpio": new Driver(new GpioIO(11))
 }))
 ```
 ### States and Events
 Device states:
 
+  * `busy`: switching from on to off, brb
   * `on` : Device is activated
   * `off`: Device is de-activated
   * `error` : communication with driver has failed (failure detection not yet implemented)
 
-Devices possess an EventEmitter instance as their `events` property. All state changes are emitted.
+Device Events:
+
+  __TODO__: Event API shifting too quickly right now...
 
 ## App
 
-The App is the hub for accessing Devices and Sensors. It also echos events from its Sensors and Devices, decoupling the services watching from the hardware under observation.
+The App is the hub for accessing Devices and Sensors.
 
 <a name="rest-server"></a>
 ## REST Server
