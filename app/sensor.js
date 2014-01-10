@@ -7,10 +7,10 @@ var Sensor = function(opt) {
   this.id = opt.id;
   this.driver = opt.driver;
 
-  this.update = function() {
-    this.driver.fromHardware(this);
+  this.update = function(next) {
+    this.driver.fromHardware(this, next);
   };
 };
 
-util.inherit(Sensor, Endpoint);
+util.inherits(Sensor, Endpoint);
 module.exports = Sensor;

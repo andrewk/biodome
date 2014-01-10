@@ -1,11 +1,12 @@
 var device = require('../../app/device')
-  , DummyDriver = require('./driver');
+  , driver = require('../../app/driver')
+  , io = require('./io').make();
 
 module.exports = device;
 
 module.exports.make = function() {
   return new device({
     "id"  : "device_" + Math.floor(Math.random() * 100),
-    "driver": new DummyDriver
+    "driver": new driver(io)
   });
 };

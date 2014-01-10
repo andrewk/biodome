@@ -1,8 +1,7 @@
 var owjs = require('owjs')
   , conf = require('../../config/app')
-  , base = require('./base');
 
-var OwserverDriver = function(deviceAddress) {
+var OwserverIO = function(deviceAddress) {
   var self = this;
   self.deviceAddress = deviceAddress;
   self.client = new owjs.Client({host: conf.get('owserver_ip')});
@@ -20,7 +19,5 @@ var OwserverDriver = function(deviceAddress) {
   }
 };
 
-OwserverDriver.prototype = new base;
-
-module.exports = OwserverDriver;
+module.exports = OwserverIO;
 

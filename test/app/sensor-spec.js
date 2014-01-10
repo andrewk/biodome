@@ -2,7 +2,9 @@ var chai = require("chai")
   , sinon = require("sinon")
   , expect = chai.expect
   , sensor = require("../../app/sensor")
-  , driver = require("../blueprints/driver").make()
+  , Driver = require("../../app/driver")
+  , io = require("../blueprints/io").make()
+  , driver = new Driver(io);
 
 describe('Sensor', function() {
   describe('#initialize', function() {
@@ -18,8 +20,8 @@ describe('Sensor', function() {
         , cbBusy = sinon.spy()
         , cbReady = sinon.spy()
 
-      s.events.on('busy', cbBusy);
-      s.events.on('ready', cbReady);
+      s.on('busy', cbBusy);
+      s.on('ready', cbReady);
 
       s.update();
       expect(cbBusy.called).to.be.true;
