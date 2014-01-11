@@ -1,15 +1,9 @@
-<<<<<<< HEAD
-<img src="https://github.com/andrewk/node-biodome/raw/master/assets/logo-web.png">
-
-# node-biodome  [![Build Status](https://secure.travis-ci.org/andrewk/node-biodome.png?branch=master)](http://travis-ci.org/andrewk/node-biodome)
-=======
 <img src="../blob/master/assets/logo-web.png">
->>>>>>> events-everywhere
 
 # biodome [![Build Status](https://secure.travis-ci.org/andrewk/biodome.png?branch=master)](http://travis-ci.org/andrewk/biodome)
 ## home automation you can live with
 
-In active development, API under regular shift
+In active development, API unstable
 
   * [Overview](#overview)
   * [Sensors](#sensors)
