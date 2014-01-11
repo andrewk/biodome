@@ -1,5 +1,5 @@
-var device = require('../../app/device')
-  , driver = require('../../app/driver')
+var device = require('../../lib/device')
+  , driver = require('../../lib/driver')
   , io = require('./io').make();
 
 module.exports = device;

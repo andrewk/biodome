@@ -1,4 +1,4 @@
-var appClass = require('../../app/app.js')
+var appClass = require('../../lib/app.js')
   , conf = require('../../config/app')
   , device = require('./device')
   , sensor = require('./sensor')

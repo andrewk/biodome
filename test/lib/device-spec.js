@@ -1,8 +1,8 @@
 var chai = require("chai")
   , sinon = require("sinon")
   , expect = chai.expect
-  , Device = require("../../app/device")
-  , Driver = require("../../app/driver")
+  , Device = require("../../lib/device")
+  , Driver = require("../../lib/driver")
   , dConf = {
       "id"      : "test_device", 
       "driver"  : new Driver(require('../blueprints/io').make())

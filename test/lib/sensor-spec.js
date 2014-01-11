@@ -1,8 +1,8 @@
 var chai = require("chai")
   , sinon = require("sinon")
   , expect = chai.expect
-  , sensor = require("../../app/sensor")
-  , Driver = require("../../app/driver")
+  , sensor = require("../../lib/sensor")
+  , Driver = require("../../lib/driver")
   , io = require("../blueprints/io").make()
   , driver = new Driver(io);
 

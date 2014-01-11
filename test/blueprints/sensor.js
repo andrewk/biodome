@@ -1,5 +1,5 @@
-var driver = require('../../app/driver')
-  , sensor = require('../../app/sensor')
+var driver = require('../../lib/driver')
+  , sensor = require('../../lib/sensor')
   , io = require('./io').make()
 
 module.exports = sensor;
