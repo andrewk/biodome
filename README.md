@@ -1,7 +1,8 @@
-<img src="../blob/master/assets/logo-web.png">
+<img src="https://github.com/andrewk/node-biodome/raw/master/assets/logo-web.png">
 
 # biodome [![Build Status](https://secure.travis-ci.org/andrewk/biodome.png?branch=master)](http://travis-ci.org/andrewk/biodome)
-## home automation you can live with
+
+__home automation for node.js __
 
 In active development, API unstable
 
