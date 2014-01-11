@@ -1,33 +1,34 @@
 {
   "name" : "biodome",
   "description" : "Home automation you can live with",
-  "version" : "0.0.1",
+  "version" : "0.0.2",
   "author" : "Andrew Krespanis",
   "license" : "MIT",
   "homepage" : "https://github.com/andrewk/biodome",
+  "main" : "./lib/biodome.js",
   "keywords" : [
     "gpio",
     "owfs",
     "1wire",
-    "robotics",
     "automation"
   ],
   "scripts" : {
     "test" : "make test"
   },
   "dependencies" : {
-    "chai" : "1.8.x",
-    "es6-promise" : "0.1.x",
     "gpio" : "0.2.x",
     "lodash" : "2.4.x",
-    "mocha" : "1.14.x",
     "nconf" : "0.6.x",
     "owjs" : "0.1.x",
     "restify" : "2.6.x",
-    "sinon" : "1.7.x",
     "socket.io" : "0.9.x",
+    "socket.io-rpc" : "0.3.x"
+  },
+  "devDependencies" : {
+    "chai" : "1.8.x",
+    "mocha" : "1.14.x",
+    "sinon" : "1.7.x",
     "socket.io-client" : "0.9.x",
-    "socket.io-rpc" : "0.3.x",
     "supertest" : "0.8.x"
   },
   "repository": {
