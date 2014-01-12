@@ -2,9 +2,9 @@
 
 # biodome [![Build Status](https://secure.travis-ci.org/andrewk/biodome.png?branch=master)](http://travis-ci.org/andrewk/biodome)
 
-__home automation for node.js __
+**home automation for node.js**
 
-In active development, API unstable
+NOT YET SUITABLE FOR USE - in active development
 
   * [Overview](#overview)
   * [Sensors](#sensors)
