@@ -10,10 +10,7 @@ NOT YET SUITABLE FOR USE - in active development
   * [Sensors](#sensors)
   * [Devices](#devices)
   * [Application](#app)
-  * [REST Server](#rest-server)
-  * [WebSocket Server](#socket-server)
-  * [WebSocket RPC](#rpc-server)
-  * [Test Suite](#tests)
+  * [Tests](#tests)
   * [License](#license)
 
 ## Overview
@@ -31,9 +28,11 @@ A Sensor reads a value, which is provided by its IO, via the driver. Sensors are
 The Driver instance is injected into the Sensor at instantiation:
 
 ```javascript
-var temperature =  new Sensor({
+var bio = require('biodome');
+
+var temperature =  bio.sensor({
   "id" : "Outside Temperature",
-  "driver" : new Driver(new OwserverIO('/10.E89C8A020800/temperature'))
+  "driver" : bio.driver(bio.io.owserver('/10.E89C8A020800/temperature'))
 }));
 
 temperature.update(function(err, sensor) {
@@ -55,9 +54,10 @@ Sensors states:
 A Device is hardware which can be fed input such as relays, motors, etc. Devices are OUTPUT endpoints.
 
 ```javascript
-var pump = new Device({
+var bio = require('biodome');
+var pump = bio.device({
   "id"  : "water_pump",
-  "gpio": new Driver(new GpioIO(11))
+  "gpio": bio.driver(bio.io.gpoi(11))
 }))
 ```
 ### States and Events
@@ -75,35 +75,6 @@ Device Events:
 ## App
 
 The App is the hub for accessing Devices and Sensors.
-
-<a name="rest-server"></a>
-## REST Server
-
-A basic synchronous HTTP API is implemented using `restify` and available for extension via `app.server()`. The server is lazy-loaded on first call and is not listening on any port until its `listen` method is called. This service is indended as read-only.
-
-API endpoints:
-```
-GET /status  # TODO
-GET /devices
-GET /devices/:id
-GET /sensors
-GET /sensors/:id
-```
-
-<a name="socket-server"></a>
-## Socket Server
-
-SocketServer listens to `app.server().
-
-Socket broadcast events:
-```
-'sensor update' - JSON representation of a newly-updated Sensor
-'device update' - JSON representation of an updated Device
-```
-
-### Socket RPC
-
-RPC API for JavaScript via WebSockets. Not yet implemented.
 
 <a name="tests"></a>
 ## Tests!
