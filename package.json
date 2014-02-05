@@ -1,34 +1,35 @@
 {
-  "name" : "biodome",
-  "description" : "Home automation you can live with",
-  "version" : "0.0.2",
-  "author" : "Andrew Krespanis",
-  "license" : "MIT",
-  "homepage" : "https://github.com/andrewk/biodome",
-  "main" : "./lib/biodome.js",
-  "keywords" : [
+  "name": "biodome",
+  "description": "Home automation you can live with",
+  "version": "0.0.2",
+  "author": "Andrew Krespanis",
+  "license": "MIT",
+  "homepage": "https://github.com/andrewk/biodome",
+  "main": "./lib/biodome.js",
+  "keywords": [
     "gpio",
     "owfs",
     "1wire",
     "automation"
   ],
-  "scripts" : {
-    "test" : "make test"
+  "scripts": {
+    "test": "make test"
   },
-  "dependencies" : {
-    "gpio" : "0.2.x",
-    "lodash" : "2.4.x",
-    "nconf" : "0.6.x",
-    "owjs" : "0.1.x",
+  "dependencies": {
+    "gpio": "0.2.x",
+    "lodash": "2.4.x",
+    "owjs": "0.1.x",
+    "ws": "~0.4.31",
+    "envc": "~1.0.0"
   },
-  "devDependencies" : {
-    "chai" : "1.8.x",
-    "mocha" : "1.14.x",
-    "sinon" : "1.7.x",
-    "supertest" : "0.8.x"
+  "devDependencies": {
+    "chai": "1.8.x",
+    "mocha": "1.14.x",
+    "sinon": "1.7.x",
+    "supertest": "0.8.x"
   },
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/andrewk/biodome.git"
+    "type": "git",
+    "url": "https://github.com/andrewk/biodome.git"
   }
 }

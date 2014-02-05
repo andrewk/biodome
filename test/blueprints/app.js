@@ -1,11 +1,10 @@
 var appClass = require('../../lib/app.js')
-  , conf = require('../../config/app')
   , device = require('./device')
   , sensor = require('./sensor')
 
 module.exports = appClass;
 module.exports.make = function() {
-  var app = new appClass(conf);
+  var app = appClass.factory();
 
   app.addDevice(device.make());
   app.addDevice(device.make());
