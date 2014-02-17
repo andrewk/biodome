@@ -75,22 +75,20 @@ describe("mock-gpio", function() {
       expect(callback.called).to.be.true;
     });
 
-    it('should fire a `valueChange` event', function(done) {
+    it('should fire a `valueChange` event', function() {
       var cb = sinon.spy();
       var pin = gpio.export(1);
       pin.on("valueChange", cb);
       pin.set(1);
       expect(cb.called).to.be.true;
-      done();
     });
 
-    it('should fire a `change` event', function(done) {
+    it('should fire a `change` event', function() {
       var cb = sinon.spy();
       var pin = gpio.export(1);
       pin.on("change", cb);
       pin.set(1);
       expect(cb.called).to.be.true;
-      done();
     });
   });
 })
