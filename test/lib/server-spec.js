@@ -1,9 +1,12 @@
 var chai = require("chai")
   , sinon = require("sinon")
   , request = require("supertest")
+  , WebSocket = require('ws')
   , expect = chai.expect
   , serverFactory = require('../../lib/server').factory
   , app = require('../blueprints/app');
+
+var port = 2000;
 
 describe('connection', function() {
   it('refuses access without correct access token');
@@ -29,19 +32,42 @@ describe('server status', function() {
         if (err) throw err;
         server.close();
         done();
-      }); 
+      });
   });
 });
 
 describe('client message received', function() {
-  it.skip('validates the message', function(done) {
-    var validator = sinon.spy();
-    var msgGateway = sinon.spy();
-    s.msgHandler = { 
-      validateMessage : validator,
-      sendMessageToApp : msgGateway
-    };
-    done(new Error('fail')); 
+  it('passes message to messageHandler', function(done) { 
+    var validatorCalled = false;
+    var senderCalled = false;
+    var srv = serverFactory(
+      app.make(),
+      {
+        validateMessage : function(msg, app) {
+          validatorCalled = true;
+          return { 'valid' : true, 'error' : null };
+        },
+        sendMessageToApp : function(msg, app) {
+          senderCalled = true;
+        }
+      }
+    );
+    process.env.PORT = ++port;
+
+    srv.createSocketServer(function() {
+      var ws = new WebSocket('ws://localhost:' + port);
+      ws.on('open', function() {
+        ws.send('noop');
+        ws.close();
+      });
+      ws.on('close', function() {
+        expect(validatorCalled).to.be.true;
+        expect(senderCalled).to.be.true;
+        srv.close();
+        done();
+      });
+    });
+
   });
 });
 
