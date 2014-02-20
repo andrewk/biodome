@@ -1,13 +1,10 @@
 RUNNER = ./node_modules/.bin/mocha
 
 test:
-	@NODE_ENV=test $(RUNNER) \
-		--recursive \
-		--reporter spec
+	@NODE_ENV=test $(RUNNER) 
 
 test-watch:
 	@NODE_ENV=test $(RUNNER) \
-		--recursive \
 		--reporter dot \
 		--growl \
 		--watch
