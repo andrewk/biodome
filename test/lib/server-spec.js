@@ -14,10 +14,6 @@ describe('connection', function() {
   it('sends system status data on successful connection');
 });
 
-describe('SSL connection', function() {
-  it('provides an SSL certificate');
-});
-
 describe('server status', function() {
   before(function() {
     server = serverFactory(app.make());
@@ -37,7 +33,7 @@ describe('server status', function() {
 });
 
 describe('client message received', function() {
-  it('passes message to messageHandler', function(done) { 
+  it('passes message to messageHandler', function(done) {
     var validatorCalled = false;
     var senderCalled = false;
     var srv = serverFactory(
@@ -67,12 +63,36 @@ describe('client message received', function() {
         done();
       });
     });
-
   });
 });
 
 describe('app events', function() {
-  it('broadcasts sensor update');
-  it('broadcasts device update');
+  it('broadcasts endpoint update', function(done) {
+    // Setup Server
+    var biodome = app.make();
+    var srv = serverFactory(biodome);
+    process.env.PORT = ++port;
+    srv.createSocketServer(function() {
+      var ws = new WebSocket('ws://localhost:' + port);
+      
+      ws.on('open', function() {
+        // cause some update events
+        biodome.devices[0].switch('on');
+      });
+
+      ws.on('message', function(message) {
+        expect(JSON.parse(message)['data'])
+          .to.deep.equal(biodome.devices[0].toJSON());
+        ws.close();
+      });
+
+
+      ws.on('close', function() {
+        // expect received update
+        srv.close();
+        done();
+      });
+    });
+  });
 });
 

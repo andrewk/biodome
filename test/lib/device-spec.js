@@ -25,7 +25,7 @@ describe('Device', function() {
   describe('#on', function() {
     it('should set device state to "on"', function(done) {
       var d = new Device(dConf);
-      d.on(function(err, dd) {
+      d.switch('on', function(err, dd) {
         expect(dd.isState("on")).to.be.true;
         done();
       });
@@ -35,7 +35,7 @@ describe('Device', function() {
   describe('#off', function() {
     it('should set device state to "off"', function(done) {
       var d = new Device(dConf);
-      d.off(function() {
+      d.switch('off', function() {
         expect(d.isState("off")).to.be.true;
         done();
       });
