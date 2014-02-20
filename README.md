@@ -78,7 +78,7 @@ The App is the hub for accessing Devices and Sensors.
 
 <a name="tests"></a>
 ## Tests!
-Run `npm test` or `make test`
+Run `mocha`
 
 <a name="license"></a>
 ## License
