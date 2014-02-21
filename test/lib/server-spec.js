@@ -9,7 +9,9 @@ var chai = require("chai")
 var port = 2000;
 
 describe('connection', function() {
-  it('refuses access without correct access token');
+  it('refuses access without correct access token', function() {
+
+  });
   it('confirms connection with correct access token');
   it('sends system status data on successful connection');
 });
@@ -74,18 +76,27 @@ describe('app events', function() {
     process.env.PORT = ++port;
     srv.createSocketServer(function() {
       var ws = new WebSocket('ws://localhost:' + port);
-      
+
       ws.on('open', function() {
         // cause some update events
         biodome.devices[0].switch('on');
+        biodome.sensors[0].update();
       });
 
+      var msgCount = 0;
       ws.on('message', function(message) {
-        expect(JSON.parse(message)['data'])
-          .to.deep.equal(biodome.devices[0].toJSON());
-        ws.close();
-      });
+        msgCount++;
+        var data = JSON.parse(message);
+        if (data['type'] == 'device') {
+          expect(data.data).to.deep.equal(biodome.devices[0].toJSON());
+        }
 
+        if (data['type'] == 'sensor') {
+          expect(data.data).to.deep.equal(biodome.sensors[0].toJSON());
+        }
+
+        if (msgCount == 2) ws.close();
+      });
 
       ws.on('close', function() {
         // expect received update
