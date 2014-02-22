@@ -66,6 +66,39 @@ describe('client message received', function() {
       });
     });
   });
+
+  it('informs client of invalid message', function(done) {
+    var srv = serverFactory(
+      app.make(),
+      {
+        validateMessage : function(msg, app) {
+          return { 'valid' : false, 'error' : 'Such fail.' };
+        },
+        sendMessageToApp : function(msg, app) {}
+      }
+    );
+    process.env.PORT = ++port;
+
+    srv.createSocketServer(function() {
+      var ws = new WebSocket('ws://localhost:' + port);
+      ws.on('open', function() {
+        ws.send('noop');
+      });
+
+      ws.on('message', function(message) {
+        var data = JSON.parse(message);
+        expect(data.type).to.equal('error');
+        expect(data.message).to.equal('Such fail.');
+        ws.close();
+      });
+
+      ws.on('close', function() {
+        srv.close();
+        done();
+      });
+    });
+  });
+
 });
 
 describe('app events', function() {
@@ -98,8 +131,8 @@ describe('app events', function() {
         if (msgCount == 2) ws.close();
       });
 
+      // cleanup
       ws.on('close', function() {
-        // expect received update
         srv.close();
         done();
       });
