@@ -90,9 +90,6 @@ describe('client message received', function() {
         expect(data.type).to.equal('error');
         expect(data.message).to.equal('Such fail.');
         ws.close();
-      });
-
-      ws.on('close', function() {
         srv.close();
         done();
       });
@@ -128,13 +125,11 @@ describe('app events', function() {
           expect(data.data).to.deep.equal(biodome.sensors[0].toJSON());
         }
 
-        if (msgCount == 2) ws.close();
-      });
-
-      // cleanup
-      ws.on('close', function() {
-        srv.close();
-        done();
+        if (msgCount == 2) {
+          ws.close();
+          srv.close();
+          done();
+        }
       });
     });
   });
