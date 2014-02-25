@@ -9,11 +9,8 @@ var chai = require("chai")
 var port = 2000;
 
 describe('connection', function() {
-  it('refuses access without correct access token', function() {
-
-  });
+  it('refuses access without correct access token');
   it('confirms connection with correct access token');
-  it('sends system status data on successful connection');
 });
 
 describe('server status', function() {
