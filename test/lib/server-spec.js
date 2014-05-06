@@ -3,7 +3,7 @@ var chai = require("chai")
   , request = require("supertest")
   , WebSocket = require('ws')
   , expect = chai.expect
-  , serverFactory = require('../../lib/server').factory
+  , servernew = require('../../lib/server').new
   , app = require('../blueprints/app');
 
 var port = 2000;
@@ -15,7 +15,7 @@ describe('connection', function() {
 
 describe('server status', function() {
   before(function() {
-    server = serverFactory(app.make());
+    server = servernew(app.make());
   });
 
   it('responds with JSON server uptime and system stats', function(done) {
@@ -35,7 +35,7 @@ describe('client message received', function() {
   it('passes message to messageHandler', function(done) {
     var validatorCalled = false;
     var senderCalled = false;
-    var srv = serverFactory(
+    var srv = servernew(
       app.make(),
       {
         validateMessage : function(msg, app) {
@@ -65,7 +65,7 @@ describe('client message received', function() {
   });
 
   it('informs client of invalid message', function(done) {
-    var srv = serverFactory(
+    var srv = servernew(
       app.make(),
       {
         validateMessage : function(msg, app) {
@@ -99,7 +99,7 @@ describe('app events', function() {
   it('broadcasts endpoint update', function(done) {
     // Setup Server
     var biodome = app.make();
-    var srv = serverFactory(biodome);
+    var srv = servernew(biodome);
     process.env.PORT = ++port;
     srv.createSocketServer(function() {
       var ws = new WebSocket('ws://localhost:' + port);

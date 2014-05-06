@@ -1,7 +1,7 @@
 var chai = require("chai")
   , sinon = require("sinon")
   , assert = chai.assert
-  , messager = require('../../lib/message-interpreter').factory()
+  , messager = require('../../lib/message-interpreter').new()
   , app = require('../blueprints/app').make();
 
 describe('MessageInterpreter', function() {

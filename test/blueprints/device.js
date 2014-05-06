@@ -1,6 +1,6 @@
 var device = require('../../lib/device')
-  , driver = require('../../lib/driver')
-  , io = require('./io').make();
+  , driver = require('../../lib/drivers/base')
+  , io = require('../mocks/io').new();
 
 module.exports = device;
 

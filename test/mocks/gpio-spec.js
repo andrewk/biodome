@@ -1,9 +1,9 @@
-var chai = require("chai")
-  , sinon = require("sinon")
+var chai = require('chai')
+  , sinon = require('sinon')
   , expect = chai.expect
-  , gpio = require("./gpio");
+  , gpio = require('./gpio');
 
-describe("mock-gpio", function() {
+describe('mock-gpio', function() {
   describe('#export', function() {
     it('should set the headerNum', function() {
       var pin = gpio.export(4);

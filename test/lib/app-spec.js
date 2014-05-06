@@ -1,7 +1,7 @@
 var chai = require("chai")
   , sinon = require("sinon")
   , expect = chai.expect
-  , A = require('../../lib/app').factory
+  , A = require('../../lib/app').new
   , device = require('../blueprints/device')
   , sensor = require('../blueprints/sensor')
   , gpio = require('../mocks/gpio');
