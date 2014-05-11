@@ -92,22 +92,25 @@ describe('client message received', function() {
       });
     });
   });
-
 });
 
-describe('app events', function() {
-  it('broadcasts endpoint update', function(done) {
+describe('request endpoint update', function() {
+  it('receives endpoint JSON after requesting update', function(done) {
     // Setup Server
     var biodome = app.make();
+    biodome.endpoints.push(
+      endpoint.make({
+        'type': 'humidity',
+        'id': 'bathroom'
+      })
+    );
     var srv = servernew(biodome);
     process.env.PORT = ++port;
     srv.createSocketServer(function() {
       var ws = new WebSocket('ws://localhost:' + port);
 
       ws.on('open', function() {
-        // cause some update events
-        biodome.devices[0].switch('on');
-        biodome.sensors[0].update();
+        ws.send(JSON.stringify([[{'type': 'humidity'},{'read': null}]]));
       });
 
       var msgCount = 0;

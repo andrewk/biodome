@@ -1,51 +1,41 @@
-var chai = require("chai")
-  , sinon = require("sinon")
+var chai = require('chai')
+  , sinon = require('sinon')
   , expect = chai.expect
-  , A = require('../../lib/app').new
-  , device = require('../blueprints/device')
-  , sensor = require('../blueprints/sensor')
-  , gpio = require('../mocks/gpio');
+  , App = require('../../lib/app')
+  , endpoint = require('../blueprints/endpoint');
 
-describe("Biodome", function() {
-  describe('#new', function() {
-    it('has an empty devices array', function() {
-      var app = A();
-      expect(app.devices.length).to.equal(0);
-    });
-
-    it('has an empty sensors array', function() {
-      var app = A();
-      expect(app.sensors.length).to.equal(0);
-    });
-  });
-
-  describe('#sensor', function() {
-    it('returns sensor by id', function() {
-      var app = A();
-      var s = sensor.make();
-      app.addSensor(s);
-
-      expect(app.sensor(s.id)).to.equal(s);
+describe('App', function() {
+  describe('#endpointsWhere', function() {
+    it('returns endpoints matching property=value', function() {
+      var app = App.new();
+      app.endpoints.push(endpoint.make({'type' : 'foo'}));
+      app.endpoints.push(endpoint.make({'type' : 'bar'}));
+      app.endpoints.push(endpoint.make({'type' : 'bar'}));
+      var endpoints = app.endpointsWhere({'type': 'bar'});
+      expect(endpoints.length).to.equal(2);
+      endpoints.map(function(ep) {
+        expect(ep.type).to.equal('bar');
+      });
     });
 
     it('returns null for unrecognized id', function() {
-      var app = A();
-      expect(app.device("does_not_exist")).to.be.null;
+      var app = App.new();
+      expect(app.endpoint('does_not_exist')).to.be.null;
     });
   });
 
- describe('#device', function() {
-    it('returns device by id', function() {
-      var app = A();
-      var d = device.make();
-      app.addDevice(d);
+  describe('#endpoint', function() {
+    it('returns endpoint by id', function() {
+      var app = App.new();
+      var s = endpoint.make();
+      app.endpoints.push(s);
 
-      expect(app.device(d.id)).to.equal(d);
+      expect(app.endpoint(s.id)).to.equal(s);
     });
 
     it('returns null for unrecognized id', function() {
-      var app = A();
-      expect(app.device("does_not_exist")).to.be.null;
+      var app = App.new();
+      expect(app.endpoint('does_not_exist')).to.be.null;
     });
   });
 });
