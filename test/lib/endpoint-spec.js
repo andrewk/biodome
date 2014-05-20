@@ -34,14 +34,14 @@ describe('Endpoint', function() {
       });
     });
 
-    it('sets busy to false after driver write error', function() {
+    it('remains busy after driver write error', function() {
       var e = new Endpoint(options());
       e.value = 0;
       e.busy = true;
       e.driver.io.alwaysResolve = false;
 
       return expect(e.write(1)).to.be.rejected.then(function() {
-        expect(e.busy).to.be.false;
+        expect(e.busy).to.be.true;
       });
     });
   });
@@ -57,14 +57,24 @@ describe('Endpoint', function() {
       });
     });
 
-    it('sets busy to false after driver read error', function() {
+    it('sets busy to false after successful driver read', function() {
+      var e = new Endpoint(options());
+      e.value = 0;
+      e.busy = true;
+
+      return expect(e.read()).to.be.fulfilled.then(function() {
+        expect(e.busy).to.be.false;
+      });
+    });
+
+    it('remains busy after driver read error', function() {
       var e = new Endpoint(options());
       e.value = 0;
       e.busy = true;
       e.driver.io.alwaysResolve = false;
 
       return expect(e.read()).to.be.rejected.then(function() {
-        expect(e.busy).to.be.false;
+        expect(e.busy).to.be.true;
       });
     });
   });
