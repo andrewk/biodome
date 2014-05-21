@@ -4,12 +4,10 @@
 
 **home automation for node.js**
 
-NOT YET SUITABLE FOR USE - in active development
-
   * [Overview](#overview)
-  * [Sensors](#sensors)
-  * [Devices](#devices)
+  * [Endpoints](#endpoints)
   * [Application](#app)
+  * [Server](#app)
   * [Tests](#tests)
   * [License](#license)
 
@@ -21,64 +19,105 @@ This is the core service, providing hardware (aka `Endpoint`) interaction. It do
   * Prefer low-cost, highly replacable hardware.
   * Ease of adaptation.
 
-<a name="sensors"></a>
-## Sensors
-A Sensor reads a value, which is provided by its IO, via the driver. Sensors are INPUT. The IO could be I2C, 1-wire (owfs), UART, TCP, HTTP, shell calls; whatever you can access from node. Existing IO implementations are in [app/io](../blob/master/app/io), with the primary design goal being ease of adding new IO implementations.
+<a name="endpoints"></a>
+## Endpoints
 
-The Driver instance is injected into the Sensor at instantiation:
+An Endpoint is a device or sensor which the system owns. The IO could be I2C, 1-wire (owfs), UART, TCP, HTTP, shell calls; whatever you can access from node. An **Endpoint** instance contains a **Driver** instance, which contains an **IO** instance. The Driver and IO layers have clearly defined roles, and are composed together to simplify their implementations and allow re-use.
 
+### Drivers
+
+The role of the driver is any data translation required to achieve the desired result at the endpoint hardware. One example is inverting the logic for relay boards which use HIGH as off, and LOW as on (eg: relay boards sold by Futurlec). For such an endpoint, you would use an inverting driver to send a 1 to the IO when a value of 0 is passed to the Endpoint's `write` method. Another example might be converting characters to suitable character codes for an LCD endpoint. 
+
+### IO
+
+IO is responsible for handling the transmission protocol between the Biodome server and the Endpoint. It knows nothing of the devices or sensors it is providing for, only how to get a provided value down the wire or across the airwaves to an endpoint. In the case of multiplexing, a shared multiplexing IO instance would abstract away all that complexity form the drivers and endpoints, which would not need to make any account for their shared means of communication.
+
+A convenience API is provided for shorthand instantiation:
 ```javascript
 var bio = require('biodome');
 
-var temperature =  bio.sensor({
+var temperature =  bio.endpoint({
   "id" : "Outside Temperature",
-  "driver" : bio.driver(bio.io.owserver('/10.E89C8A020800/temperature'))
+  "driver" : bio.drivers.base(bio.io.owserver('/10.E89C8A020800/temperature'))
 }));
 
-temperature.update(function(err, sensor) {
-  console.log(sensor.value);
+temperature.read().then(function(result) {
+  console.log(result.value);
 });
 ```
 
-### States and Events
-Sensors states:
-
-  * `busy` : sensor is awaiting response of asynchronous update from its driver
-  * `ready`: update complete
-  * `error`: communication with driver has failed (failure detection not yet implemented)
-
-#### Sensors Events:
-  __TODO__: Event API shifting too quickly right now...
-
-## Devices
-A Device is hardware which can be fed input such as relays, motors, etc. Devices are OUTPUT endpoints.
+Alternatively, this will give the same result:
 
 ```javascript
-var bio = require('biodome');
-var pump = bio.device({
-  "id"  : "water_pump",
-  "gpio": bio.driver(bio.io.gpoi(11))
-}))
+var Endpoint = require('biodome/lib/endpoint')
+  , BaseDriver = require('biodome/lib/drivers/base')
+  , OwserverIO = require('biodome/lib/io/owserver');
+
+var temperature =  new Endpoint({
+  "id" : "Outside Temperature",
+  "driver" : new BaseDriver(new OwserverIO('/10.E89C8A020800/temperature'))
+}));
+
+temperature.read().then(function(result) {
+  console.log(result.value);
+});
 ```
-### States and Events
-Device states:
-
-  * `busy`: switching from on to off, brb
-  * `on` : Device is activated
-  * `off`: Device is de-activated
-  * `error` : communication with driver has failed (failure detection not yet implemented)
-
-Device Events:
-
-  __TODO__: Event API shifting too quickly right now...
+I shifting too quickly right now...
 
 ## App
 
-The App is the hub for accessing Devices and Sensors.
+The App provides a JSON API for controlling endpoints and an API for selecting a subgroup of endpoints from its endpoint array
+
+### `endpoint` method
+
+```javascript
+// return single endpoint or null, lookup by properties
+var porchLight = app.endpoint({id: 'porch', 'type': 'light'});
+
+porchLight.write(1).then(function(json) {
+  console.log('Light turned on at ' + json.updatedAt);
+});
+```
+
+### `endpointsWhere` method
+
+```javascript
+// return array of endpoints, lookup by properties
+var tempSensors = app.endpointsWhere({'type' : 'temp'});
+
+// update all their values and return their toJSON output
+Promise.all(tempSensors.map(function(ep) {
+  return ep.read();
+}).then(function(resultsJSON) {
+  console.log(resultsJSON);
+});
+```
+
+### App Instructions Interface
+
+The `executeInstruction` method expects an instruction object in the following format:
+
+```
+{
+  'selector' : {'id' : 'LCD1'},
+  'command' : {'type' : 'write', 'value' : 'Hello World' }
+}
+```
+
+`selector` is the same format as expected by the `endpointsWhere` method.
+`command` can have a `type` of `read` or `write`
+
+Validation is performed by the `InstructionValidator` class.
+
+## Server
+The Server provides a websocket API to the App's instruction interface. It expects messages of serialized JSON App instructions, and returns messages of serialized JSON result sets.
+
+### Server security
+**TODO**
 
 <a name="tests"></a>
 ## Tests!
-Run `mocha`
+Run `mocha` or `npm run tests`
 
 <a name="license"></a>
 ## License
