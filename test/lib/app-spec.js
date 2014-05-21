@@ -28,17 +28,17 @@ describe('App', function() {
   });
 
   describe('#endpoint', function() {
-    it('returns endpoint by id', function() {
+    it('returns single endpoint by properties obj', function() {
       var app = App.new();
       var s = endpoint.make();
       app.endpoints.push(s);
 
-      expect(app.endpoint(s.id)).to.equal(s);
+      expect(app.endpoint({'id': s.id})).to.equal(s);
     });
 
     it('returns null for unrecognized id', function() {
       var app = App.new();
-      expect(app.endpoint('does_not_exist')).to.be.null;
+      expect(app.endpoint({'id': 'does_not_exist'})).to.be.null;
     });
   });
 
