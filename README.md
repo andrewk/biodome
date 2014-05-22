@@ -6,8 +6,11 @@
 
   * [Overview](#overview)
   * [Endpoints](#endpoints)
+    * [Drivers](#drivers)
+    * [IO](#io)
   * [Application](#app)
-  * [Server](#app)
+    * [Application Instruction Interface](#app-api) 
+  * [Server](#server)
   * [Tests](#tests)
   * [License](#license)
 
@@ -24,10 +27,11 @@ This is the core service, providing hardware (aka `Endpoint`) interaction. It do
 
 An Endpoint is a device or sensor which the system owns. The IO could be I2C, 1-wire (owfs), UART, TCP, HTTP, shell calls; whatever you can access from node. An **Endpoint** instance contains a **Driver** instance, which contains an **IO** instance. The Driver and IO layers have clearly defined roles, and are composed together to simplify their implementations and allow re-use.
 
+<a name="drivers"></a>
 ### Drivers
 
 The role of the driver is any data translation required to achieve the desired result at the endpoint hardware. One example is inverting the logic for relay boards which use HIGH as off, and LOW as on (eg: relay boards sold by Futurlec). For such an endpoint, you would use an inverting driver to send a 1 to the IO when a value of 0 is passed to the Endpoint's `write` method. Another example might be converting characters to suitable character codes for an LCD endpoint. 
-
+<a name="io"></a>
 ### IO
 
 IO is responsible for handling the transmission protocol between the Biodome server and the Endpoint. It knows nothing of the devices or sensors it is providing for, only how to get a provided value down the wire or across the airwaves to an endpoint. In the case of multiplexing, a shared multiplexing IO instance would abstract away all that complexity form the drivers and endpoints, which would not need to make any account for their shared means of communication.
@@ -62,7 +66,6 @@ temperature.read().then(function(result) {
   console.log(result.value);
 });
 ```
-I shifting too quickly right now...
 
 ## App
 
@@ -92,7 +95,7 @@ Promise.all(tempSensors.map(function(ep) {
   console.log(resultsJSON);
 });
 ```
-
+<a name="app-api"></a>
 ### App Instructions Interface
 
 The `executeInstruction` method expects an instruction object in the following format:
