@@ -1,13 +1,12 @@
 var chai = require("chai")
-  , sinon = require("sinon")
   , expect = chai.expect
   , Device = require("../../lib/device")
-  , Driver = require("../../lib/driver")
+  , Driver = require("../../lib/drivers/base")
   , dConf = {
-      "id"      : "test_device", 
-      "driver"  : new Driver(require('../blueprints/io').make())
+      "id"      : "test_device",
+      "driver"  : new Driver(require('../mocks/io').new(true))
     };
- 
+
 
 describe('Device', function() {
   describe('#initialize', function() {
@@ -22,41 +21,30 @@ describe('Device', function() {
     });
   });
 
-  describe('#on', function() {
-    it('should set device state to "on"', function(done) {
-      var d = new Device(dConf);
-      d.switch('on', function(err, dd) {
-        expect(dd.isState("on")).to.be.true;
-        done();
-      });
-    });
-  });
-
-  describe('#off', function() {
-    it('should set device state to "off"', function(done) {
-      var d = new Device(dConf);
-      d.switch('off', function() {
-        expect(d.isState("off")).to.be.true;
-        done();
-      });
-    });
-  });
-
   describe('#switch', function() {
-    it('should set device state to "off" if set to "on"', function() {
+    it('arg of "on" sets device value to 1', function() {
       var d = new Device(dConf);
-      d.switch("off");
-      expect(d.isState("off")).to.be.true;
-      d.switch("on");
-      expect(d.isState("on")).to.be.true;
+      d.value = 0;
+      d.switch('on').then(function() {
+        expect(d.value).to.equal(1);
+      });
     });
 
-    it('should ignore unknown states', function() {
+    it('arg of "off" sets device value to 0', function() {
       var d = new Device(dConf);
-      d.switch("off");
-      expect(d.isState("off")).to.be.true;
-      d.switch("squirrels!");
-      expect(d.isState("off")).to.be.true;
+      d.value = 1;
+      d.switch('off').then(function() {
+        expect(d.value).to.equal(0);
+      });
+    });
+
+    it('should error on unknown states', function() {
+      var d = new Device(dConf);
+      d.switch("squirrels!").then(function() {
+        chai.assert(false, 'invalid argument must be rejected');
+      }).catch(function() {
+        chai.assert(true);
+      });
     });
   });
 });
