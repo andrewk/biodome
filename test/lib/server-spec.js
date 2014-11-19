@@ -3,7 +3,7 @@ var chai = require('chai')
   , request = require('supertest')
   , WebSocket = require('ws')
   , expect = chai.expect
-  , servernew = require('../../lib/server').new
+  , serverFactory = require('../../lib/server').new
   , app = require('../blueprints/app')
   , endpoint = require('../blueprints/endpoint');
 
@@ -16,7 +16,7 @@ describe('connection', function() {
 
 describe('server status', function() {
   before(function() {
-    server = servernew(app.make());
+    server = serverFactory(app.make());
   });
 
   it('responds with JSON server uptime and system stats', function(done) {
@@ -34,52 +34,33 @@ describe('server status', function() {
 
 describe('client message received', function() {
   it('informs client of invalid message', function(done) {
-    var srv = servernew(app.make());
-    process.env.PORT = ++port;
-
-    srv.createSocketServer(function() {
-      var ws = new WebSocket('ws://localhost:' + port);
-      ws.on('open', function() {
-        ws.send(null);
-      });
-
-      ws.on('message', function(message) {
-        var data = JSON.parse(message);
-        expect(data.type).to.equal('error');
-        expect(data.message).to.equal('Invalid server message');
-        ws.close();
-        srv.close();
+    request(server)
+      .post('/command')
+      .send()
+      .expect(417)
+      .end(function(err, res) {
+        if (err) throw err;
+        server.close();
         done();
       });
-    });
   });
 
   it('informs client of invalid instruction', function(done) {
-    var srv = servernew(app.make());
-    process.env.PORT = ++port;
+    var postParams = {
+      'selector': {'id':123}
+      // no command
+    };
 
-    srv.createSocketServer(function() {
-      var ws = new WebSocket('ws://localhost:' + port);
-      ws.on('open', function() {
-        ws.send(JSON.stringify(
-          {
-            'selector': {'id':123},
-            // no command
-          }
-        ));
-      });
-
-      ws.on('message', function(message) {
-        var data = JSON.parse(message);
-        expect(data.type).to.equal('error');
-        expect(data.message).to.equal('Invalid instruction: Missing command');
-        ws.close();
-        srv.close();
+    request(server)
+      .post('/command')
+      .send(postParams)
+      .expect(400)
+      .end(function(err, res) {
+        server.close();
+        if (err) return done(err);
         done();
       });
-    });
   });
-
 });
 
 describe('request endpoint update', function() {
@@ -92,28 +73,22 @@ describe('request endpoint update', function() {
         'id': 'bathroom'
       })
     ];
-    var srv = servernew(biodome);
-    process.env.PORT = ++port;
-    srv.createSocketServer(function() {
-      var ws = new WebSocket('ws://localhost:' + port);
 
-      ws.on('open', function() {
-        ws.send(JSON.stringify({
+    var srv = serverFactory(biodome);
+
+    request(srv)
+      .post('/command')
+      .send({
           'selector': {'type': 'humidity'},
           'command' : {'type': 'read', 'value': null}
-        }));
-      });
-
-      var msgCount = 0;
-      ws.on('message', function(message) {
-        msgCount++;
-        var data = JSON.parse(message);
-        expect(data.data[0]).to.deep.equal(biodome.endpoints[0].toJSON());
-        ws.close();
+        })
+      .expect(200)
+      .end(function(err, res) {
+        expect(res.body.data[0]).to.deep.equal(biodome.endpoints[0].toJSON());
         srv.close();
+        if (err) return done(err);
         done();
       });
-    });
   });
 });
 

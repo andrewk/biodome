@@ -1,7 +1,6 @@
 SERVER
 ------
 
-  - Replace websocket with sync API for issuing commands
   - Websocket remains as broadcast-only for informing all clients of updates
   - "Heart beat" read and broadcast endpoint status at configurable interval to all clients
   - "Restart" signal from server to all clients; instructs to disable and reconnect in N seconds
