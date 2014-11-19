@@ -21,7 +21,8 @@
     "owjs": "0.1.x",
     "ws": "~0.4.31",
     "envc": "~1.0.0",
-    "bluebird": "~1.2.4"
+    "bluebird": "~1.2.4",
+    "jwt-simple": "~0.2.0"
   },
   "devDependencies": {
     "chai": "1.8.x",
