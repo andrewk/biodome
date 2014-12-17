@@ -45,10 +45,9 @@ describe('client message received', function() {
       });
   });
 
-  it('informs client of invalid instruction', function(done) {
+  it('informs client of invalid command', function(done) {
     var postParams = {
       'selector': {'id':123}
-      // no command
     };
 
     request(server)
@@ -80,7 +79,7 @@ describe('request endpoint update', function() {
       .post('/command')
       .send({
           'selector': {'type': 'humidity'},
-          'command' : {'type': 'read', 'value': null}
+          'instruction' : {'type': 'read', 'value': null}
         })
       .expect(200)
       .end(function(err, res) {

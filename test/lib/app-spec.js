@@ -42,57 +42,63 @@ describe('App', function() {
     });
   });
 
-  describe('#executeInstruction', function() {
-    it('executes an instruction on a single endpoint', function() {
+  describe('#executeCommand', function() {
+    it('executes an command on a single endpoint', function() {
       var app = App.new();
       app.endpoints.push(endpoint.make({'type' : 'foo'}));
       app.endpoints.push(endpoint.make({'type' : 'bar'}));
-      var instruction = { 
+
+      var command = { 
         'selector' : {'type':'foo'},
-        'command' : {'type': 'read', 'value' : null}
+        'instruction' : {'type': 'read', 'value' : null}
       };
-      return expect(app.executeInstruction(instruction)).to.be.fulfilled
+
+      return expect(app.executeCommand(command)).to.be.fulfilled
         .then(function(result) {
           expect(result).to.deep.equal(
-            app.endpointsWhere(instruction.selector).map(function(ep) {
+            app.endpointsWhere(command.selector).map(function(ep) {
               return ep.toJSON();
             })
           );
         });
     });
 
-   it('executes an instruction on multiple endpoints', function() {
+   it('executes an command on multiple endpoints', function() {
       var app = App.new();
       app.endpoints.push(endpoint.make({'type' : 'foo'}));
       app.endpoints.push(endpoint.make({'type' : 'foo'}));
       app.endpoints.push(endpoint.make({'type' : 'foo'}));
       app.endpoints.push(endpoint.make({'type' : 'bar'}));
-      var instruction = { 
+
+      var command = { 
         'selector' : {'type':'foo'},
-        'command' : {'type': 'read', 'value' : null}
+        'instruction' : {'type': 'read', 'value' : null}
       };
-      return expect(app.executeInstruction(instruction)).to.be.fulfilled
+
+      return expect(app.executeCommand(command)).to.be.fulfilled
         .then(function(result) {
           expect(result.length).to.equal(3);
           expect(result).to.deep.equal(
-            app.endpointsWhere(instruction.selector).map(function(ep) {
+            app.endpointsWhere(command.selector).map(function(ep) {
               return ep.toJSON();
             })
           );
         });
     });
 
-    it('returns a rejected promise when given an invalid instruction', function() {
+    it('returns a rejected promise when given an invalid command', function() {
       var app = App.new();
       app.endpoints.push(endpoint.make({'type' : 'foo'}));
-      var instruction = { 
+
+      var command = { 
         'selector' : {'type':'foo'},
-        'command' : {}
+        'instruction' : {}
       };
 
-      return expect(app.executeInstruction(instruction)).to.be.rejected
+      return expect(app.executeCommand(command)).to.be.rejected
+
         .then(function(e) {
-          expect(e.toString()).to.equal('Error: Invalid instruction: Invalid command');
+          expect(e.toString()).to.equal('Error: Invalid command: Invalid instruction');
         });
     });
   });

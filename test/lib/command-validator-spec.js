@@ -1,47 +1,47 @@
 var chai = require('chai')
   , assert = chai.assert
   , expect = chai.expect
-  , validator = require('../../lib/instruction-validator').new();
+  , validate = require('../../lib/command-validator');
 
 var result;
 
-describe('InstructionValidator', function() {
+describe('CommandValidator', function() {
   describe('#validateMessage', function() {
     it('errors on missing selector', function() {
       msg = {
         'squirrels' : {'id':'foo'},
         'command' : {'type' : 'write', 'value':  1234}
       };
-      result = validator.validate(msg);
+      result = validate(msg);
       assert(!result.valid, 'expect invalid result');
-      expect(result.error).to.equal('Invalid instruction: Missing selector');
+      expect(result.error).to.equal('Invalid command: Missing selector');
     });
 
-    it('errors on missing command', function() {
+    it('errors on missing instruction', function() {
       msg = { 'selector' : {'id':'foo'} };
-      result = validator.validate(msg);
+      result = validate(msg);
       assert(!result.valid, 'expect invalid result');
-      expect(result.error).to.equal('Invalid instruction: Missing command');
+      expect(result.error).to.equal('Invalid command: Missing instruction');
     });
 
     it('errors on missing command type', function() {
       msg = {
         'selector' : {'id':'foo'},
-        'command' : {'value':  1234}
+        'instruction' : {'value':  1234}
       };
 
-      result = validator.validate(msg);
+      result = validate(msg);
       assert(!result.valid, 'expect invalid result');
-      expect(result.error).to.equal('Invalid instruction: Invalid command');
+      expect(result.error).to.equal('Invalid command: Invalid instruction');
     });
 
-    it('passes on a valid instruction', function() {
+    it('passes on a valid command', function() {
       var msg = {
         'selector' : {'id':'foo'},
-        'command' : {'type' : 'write', 'value':  1234}
+        'instruction' : {'type' : 'write', 'value':  1234}
       };
        
-      result = validator.validate(msg);
+      result = validate(msg);
       assert(result.valid, 'expect valid result');
       assert(result.error == null);
     });
