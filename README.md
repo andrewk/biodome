@@ -9,7 +9,7 @@
     * [Drivers](#drivers)
     * [IO](#io)
   * [Application](#app)
-    * [Application Instruction Interface](#app-api) 
+    * [Application Commands](#app-api) 
   * [Server](#server)
   * [Tests](#tests)
   * [License](#license)
@@ -96,27 +96,44 @@ Promise.all(tempSensors.map(function(ep) {
 });
 ```
 <a name="app-api"></a>
-### App Instructions Interface
+### App Commands
 
-The `executeInstruction` method expects an instruction object in the following format:
+The `executeCommand` method expects a command object in the following format:
 
 ```
 {
   'selector' : {'id' : 'LCD1'},
-  'command' : {'type' : 'write', 'value' : 'Hello World' }
+  'instruction' : {'type' : 'write', 'value' : 'Hello World' }
 }
 ```
 
 `selector` is the same format as expected by the `endpointsWhere` method.
-`command` can have a `type` of `read` or `write`
-
-Validation is performed by the `InstructionValidator` class.
+`instruction` can have a `type` of `read` or `write`. If `write`, it is expected to also have `value` property
 
 ## Server
-The Server provides a websocket API to the App's instruction interface. It expects messages of serialized JSON App instructions, and returns messages of serialized JSON result sets.
+
+### Command API (HTTP RPC)
+
+`POST /command`
+
+```
+{
+  'token' : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjEwfQ.YKUBhlD4led4tbMrhRVoYsjewYs6fFH669ozZVga14E,
+  'command' : {
+    'selector' : {'id' : 'LCD1'},
+    'instruction' : {'type' : 'write', 'value' : 'Hello World' }
+  }
+}
+```
+
+The JWT token should be provided by [biodome-client](http://github.com/andrewk/biodome-client)
+
+### Status update feed (Websocket)
+
+To be documented...
 
 ### Server security
-**TODO**
+**TODO LOL YOLO**
 
 <a name="tests"></a>
 ## Tests!
