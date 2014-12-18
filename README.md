@@ -15,7 +15,7 @@
   * [License](#license)
 
 ## Overview
-This is the core service, providing hardware (aka `Endpoint`) interaction. It does not implement scheduling, environment compensation, or other use-case specific tools - these will be built as seperate services. Goals include:
+This codebase provides the core service, providing hardware (aka `Endpoint`) interaction. It does not implement scheduling, environment compensation, or other use-case specific tools - these will be built as seperate services. Goals include:
 
   * Ease of adoption by people looking to assemble home/environment/industrial automation and monitoring systems.
   * Service Oriented Architecure. Allow for deployment across machines where feasible.
@@ -75,7 +75,7 @@ The App provides a JSON API for controlling endpoints and an API for selecting a
 
 ```javascript
 // return single endpoint or null, lookup by properties
-var porchLight = app.endpoint({id: 'porch', 'type': 'light'});
+var porchLight = app.endpoint({ 'id': 'porch', 'type': 'light' });
 
 porchLight.write(1).then(function(json) {
   console.log('Light turned on at ' + json.updatedAt);
@@ -86,7 +86,7 @@ porchLight.write(1).then(function(json) {
 
 ```javascript
 // return array of endpoints, lookup by properties
-var tempSensors = app.endpointsWhere({'type' : 'temp'});
+var tempSensors = app.endpointsWhere({ 'type' : 'temp' });
 
 // update all their values and return their toJSON output
 Promise.all(tempSensors.map(function(ep) {
@@ -110,11 +110,25 @@ The `executeCommand` method expects a command object in the following format:
 `selector` is the same format as expected by the `endpointsWhere` method.
 `instruction` can have a `type` of `read` or `write`. If `write`, it is expected to also have `value` property
 
+```javascript
+app.executeCommand(commandData)
+  .then(function(result) {
+    // result is JSON data of all endpoints matched by commandData.selector
+  }).catch(function(error) {
+    // Bad command
+    console.log(error.message);
+  });
+```
+
 ## Server
 
 ### Command API (HTTP RPC)
 
-`POST /command`
+**`POST /token`**
+
+Expects username and password as POST body, returns JSON Web Token (JWT) for use with command requests
+
+**`POST /command`**
 
 ```
 {
@@ -137,7 +151,7 @@ To be documented...
 
 <a name="tests"></a>
 ## Tests!
-Run `mocha` or `npm run tests`
+Run `mocha` or `npm test`
 
 <a name="license"></a>
 ## License
