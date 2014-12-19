@@ -26,6 +26,11 @@ describe('server status', function() {
       .expect(200)
       .end(function(err, res) {
         if (err) throw err;
+        chai.assert(res.body.status, 'Status');
+        chai.assert(res.body.status.load, 'Server load');
+        chai.assert(res.body.status.freememory, 'free memory');
+        chai.assert(res.body.endpoints, 'endpoints array'); 
+        chai.assert(Array.isArray(res.body.endpoints));
         server.close();
         done();
       });
