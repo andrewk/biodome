@@ -14,15 +14,18 @@
     "1wire"
   ],
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --compilers js:6to5/register"
   },
   "dependencies": {
-    "gpio": "0.2.x",
-    "owjs": "0.1.x",
-    "ws": "~0.4.31",
-    "envc": "~1.0.0",
+    "6to5": "^2.7.4",
     "bluebird": "~1.2.4",
-    "jwt-simple": "~0.2.0"
+    "envc": "~1.0.0",
+    "gpio": "0.2.x",
+    "graceful-fs": "^3.0.5",
+    "jwt-simple": "~0.2.0",
+    "owjs": "0.1.x",
+    "rx": "^2.3.22",
+    "ws": "~0.4.31"
   },
   "devDependencies": {
     "chai": "1.8.x",
