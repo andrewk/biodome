@@ -1,98 +1,53 @@
-var chai = require('chai')
-  , sinon = require('sinon')
-  , request = require('supertest')
-  , WebSocket = require('ws')
-  , expect = chai.expect
-  , serverFactory = require('../../lib/server').new
-  , app = require('../blueprints/app')
-  , endpoint = require('../blueprints/endpoint');
-
-var port = 2000;
+var chai = require('chai'),
+  sinon = require('sinon'),
+  request = require('supertest'),
+  ws = require('ws'),
+  expect = chai.expect,
+  Server = require('../../lib/server'),
+  srv;
 
 describe('connection', function() {
   it('refuses access without correct access token');
   it('confirms connection with correct access token');
 });
 
-describe('server status', function() {
-  before(function() {
-    server = serverFactory(app.make());
-  });
+describe.only('Correct handlers are used', function() {
+  var requestSpy, socketSpy;
 
-  it('responds with JSON server uptime and system stats', function(done) {
-    request(server)
-      .get('/status')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function(err, res) {
-        if (err) throw err;
-        chai.assert(res.body.status, 'Status');
-        chai.assert(res.body.status.load, 'Server load');
-        chai.assert(res.body.status.freememory, 'free memory');
-        chai.assert(res.body.endpoints, 'endpoints array'); 
-        chai.assert(Array.isArray(res.body.endpoints));
-        server.close();
-        done();
-      });
-  });
-});
+  beforeEach(function() {
+    requestSpy = sinon.spy();
+    socketSpy = sinon.spy();
 
-describe('client message received', function() {
-  it('informs client of invalid message', function(done) {
-    request(server)
-      .post('/command')
-      .send()
-      .expect(417)
-      .end(function(err, res) {
-        if (err) throw err;
-        server.close();
-        done();
-      });
-  });
-
-  it('informs client of invalid command', function(done) {
-    var postParams = {
-      'selector': {'id':123}
+    var requestHandler = function(req, res) {
+      requestSpy();
+      res.end('200');
     };
 
-    request(server)
-      .post('/command')
-      .send(postParams)
-      .expect(400)
-      .end(function(err, res) {
-        server.close();
-        if (err) return done(err);
-        done();
-      });
+    var socketHandler = function(client) {
+      socketSpy();
+      client.close();
+    };
+
+    srv = new Server({'port': 6676}, requestHandler, socketHandler);
   });
-});
 
-describe('request endpoint update', function() {
-  it('receives endpoint JSON after requesting update', function(done) {
-    // Setup Server
-    var biodome = app.make();
-    biodome.endpoints = [
-      endpoint.make({
-        'type': 'humidity',
-        'id': 'bathroom'
-      })
-    ];
-
-    var srv = serverFactory(biodome);
-
-    request(srv)
-      .post('/command')
-      .send({
-          'selector': {'type': 'humidity'},
-          'instruction' : {'type': 'read', 'value': null}
-        })
-      .expect(200)
-      .end(function(err, res) {
-        expect(res.body.data[0]).to.deep.equal(biodome.endpoints[0].toJSON());
+  it('uses composed request handler', function(done) {
+    request(srv.http).
+      post('/test').
+      send().
+      end(function(err, res) {
+        expect(requestSpy.called).to.be.true;
         srv.close();
-        if (err) return done(err);
         done();
       });
   });
-});
 
+  it('uses composed socket handler', function(done) {
+    var client = new ws('ws://localhost:6676');
+    client.on('open', function() {
+      expect(socketSpy.called).to.be.true;
+      srv.close();
+      done(); 
+    });
+  });
+});

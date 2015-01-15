@@ -3,6 +3,7 @@
 // - Subscribing to Endpoint data
 // - Merging and querying multiple Endpoint data streams
 //=============================================================================
+'use strict';
 
 var Rx = require('rx');
 var fs = require('fs');
@@ -89,6 +90,7 @@ setTimeout(
   () =>  {
     endpoints.forEach(ep => ep.destroy());
     clearInterval(randomWrites);
+    process.exit(0);
   },
   10000
 );

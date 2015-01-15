@@ -3,7 +3,7 @@ var chai = require('chai')
   , expect = chai.expect
   , validate = require('../../lib/command-validator');
 
-var result;
+var result, msg;
 
 describe('CommandValidator', function() {
   describe('#validateMessage', function() {
