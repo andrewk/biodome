@@ -1,16 +1,17 @@
-var chai = require("chai")
-  , expect = chai.expect
-  , Endpoint = require("../../lib/endpoint");
+var chai = require('chai'),
+  expect = chai.expect,
+  sinon = require('sinon'),
+  Endpoint = require("../../lib/endpoint");
 
 var chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-function options() {
-  return { 
-    driver : require("../../lib/drivers/base").new(
-      require('../mocks/io').new(true)
-    )
-  };
+function options(base) {
+  base = base || {};
+  base.driver = require("../../lib/drivers/base").new(
+    require('../mocks/io').new(true)
+  );
+  return base;
 }
 
 describe('Endpoint', function() {
@@ -33,6 +34,45 @@ describe('Endpoint', function() {
 
       return expect(e.read()).to.be.fulfilled.then(function() {
         expect(e.value).to.equal(1234);
+      });
+    });
+  });
+
+  describe('auto-refresh', function() {
+    it('creates up an interval timer if endpoint has a refresh rate', function() {
+      setInterval = sinon.spy();
+      var e = new Endpoint(options({'refreshRate': 500}));
+      expect(setInterval.called).to.be.true;
+    });
+
+    it('doesn\'t create an interval timer if endpoint has no refresh rate', function() {
+      setInterval = sinon.spy();
+      var e = new Endpoint(options());
+      expect(setInterval.called).to.be.false;
+    });
+
+    describe('active refresh', function() {
+      var clock;
+
+      before(function() {
+        clock = sinon.useFakeTimers();
+      });
+
+      after(function() {
+        clock.restore();
+      });
+
+      it('calls endpoint.read', function() {
+        var spy = sinon.spy();
+        var readStub = function() {
+          spy();
+          return Promise.resolve(1);
+        };
+
+        var e = new Endpoint({'refreshRate': 500, 'driver': {'read': readStub}});
+        expect(spy.called).to.be.false;
+        clock.tick(501);
+        expect(spy.called).to.be.true;
       });
     });
   });

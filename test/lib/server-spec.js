@@ -11,7 +11,7 @@ describe('connection', function() {
   it('confirms connection with correct access token');
 });
 
-describe.only('Correct handlers are used', function() {
+describe('Correct handlers are used', function() {
   var requestSpy, socketSpy;
 
   beforeEach(function() {
