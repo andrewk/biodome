@@ -1,6 +1,7 @@
 var chai = require('chai'),
   expect = chai.expect,
   sinon = require('sinon'),
+  Rx = require('rx'),
   Endpoint = require("../../lib/endpoint");
 
 var chaiAsPromised = require('chai-as-promised');
@@ -73,7 +74,34 @@ describe('Endpoint', function() {
         expect(spy.called).to.be.false;
         clock.tick(501);
         expect(spy.called).to.be.true;
+        e.destroy();
       });
+    });
+  });
+
+  describe('uses command stream', function() {
+    it('executes commands approved by its commandMatcher', function() {
+      var ep = new Endpoint(options());
+      var matcher = function() { 
+        return true 
+      };
+      var spy = sinon.spy();
+      var writeStub = function(value) {
+        spy(value);
+        return Promise.resolve(1);
+      };
+      ep.write = spy;
+
+      var commands = new Rx.Subject();
+      ep.subscribeToCommands(commands, matcher);
+
+      commands.onNext({
+        'selector': {'id': 'foo'},
+        'instruction': {'type': 'write', 'value': 'qux'}
+      });
+
+      expect(spy.called).to.be.true;
+      expect(spy.firstCall.args[0]).to.equal('qux');
     });
   });
 });
