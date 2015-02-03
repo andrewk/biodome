@@ -1,12 +1,12 @@
 var Rx = require('rx'),
-assert = require('chai').assert
+  assert = require('chai').assert;
 
 function createMessage(actual, expected) {
   return 'Expected: [' + expected.toString() + ']\r\nActual: [' + actual.toString() + ']';
 }
 
 function assertEqual(expected, actual) {
-  var comparer = Rx.Internals.isEqual,
+  var comparer = Rx.internals.isEqual,
   isOk = true;
 
   if (expected.length !== actual.length) {
