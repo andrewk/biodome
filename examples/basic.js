@@ -13,6 +13,10 @@ var biodome = require('../index');
 fs.writeFileSync('/tmp/biodome-demo-kiln', 499);
 fs.writeFileSync('/tmp/biodome-demo-exhaust', 480);
 
+//==================================================
+// Setup
+// ================================================
+
 // setup: create our endpoints, just use files as sensors for easy demo
 // the endpoints begin refreshing as soon as instantiated
 var endpoints = [

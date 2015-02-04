@@ -104,4 +104,8 @@ describe('Endpoint', function() {
       expect(spy.firstCall.args[0]).to.equal('qux');
     });
   });
+
+  describe('error handling', function() {
+    it('publishes IO errors to the error stream');
+  });
 });
