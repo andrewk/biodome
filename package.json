@@ -1,7 +1,7 @@
 {
   "name": "Biodome",
   "description": "Home automation you can live with",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": "Andrew Krespanis",
   "license": "MIT",
   "homepage": "https://github.com/andrewk/biodome",

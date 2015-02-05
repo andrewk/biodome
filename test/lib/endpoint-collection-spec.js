@@ -117,4 +117,47 @@ describe('EndpointCollection', function() {
       RxTest.assert(results.messages, []); 
     });
   });
+
+  describe('command stream', function() {
+    var scheduler, collection, stream1, stream2;
+
+    beforeEach(function() {
+      scheduler = new Rx.TestScheduler();
+
+      stream1 = scheduler.createHotObservable(
+          RxTest.onNext(100, 'foo'),
+          RxTest.onNext(200, 'foo'),
+          RxTest.onCompleted(500)
+      );
+      
+      stream2 = scheduler.createHotObservable(
+          RxTest.onNext(150, 'bar'),
+          RxTest.onNext(250, 'bar'),
+          RxTest.onCompleted(500)
+      );
+
+      collection = new EndpointCollection([]);
+    });
+
+    it('allows injecting multiple command streams', function() {
+      var results = scheduler.startWithTiming(
+        function() {
+          collection.injectCommands(stream1);
+          collection.injectCommands(stream2);
+          return collection.commands;
+        },
+        50,
+        90,
+        300
+      );
+
+      RxTest.assert(results.messages, [
+        RxTest.onNext(100, ['foo']),
+        RxTest.onNext(150 ['bar']),
+        RxTest.onNext(200 ['foo']),
+        RxTest.onNext(250 ['bar']),
+      ]); 
+
+    });
+  });
 });

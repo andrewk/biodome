@@ -9,7 +9,7 @@ describe('Command Matcher', function() {
       'selector' : {'id': 'foo'}
     };
     
-    expect(matcher(ep, command)).to.be.true;
+    expect(matcher(ep)(command)).to.be.true;
   });
 
   it('rejects on ID', function() {
@@ -18,7 +18,7 @@ describe('Command Matcher', function() {
       'selector' : {'id': 'qux'}
     };
     
-    expect(matcher(ep, command)).to.be.false;
+    expect(matcher(ep)(command)).to.be.false;
   });
 
   it('matches on type', function() {
@@ -27,7 +27,7 @@ describe('Command Matcher', function() {
       'selector' : {'type': 'foo'}
     };
     
-    expect(matcher(ep, command)).to.be.true;
+    expect(matcher(ep)(command)).to.be.true;
   });
 
   it('rejects on type', function() {
@@ -36,6 +36,6 @@ describe('Command Matcher', function() {
       'selector' : {'type': 'qux'}
     };
     
-    expect(matcher(ep, command)).to.be.false;
+    expect(matcher(ep)(command)).to.be.false;
   });
 });
