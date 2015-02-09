@@ -14,18 +14,18 @@
     "1wire"
   ],
   "scripts": {
-    "start": "6to5-node examples/basic.js", 
+    "start": "6to5-node examples/basic.js",
     "test": "mocha --compilers js:6to5/register"
   },
   "dependencies": {
-    "6to5": "^2.7.4",
+    "6to5": "^3.5.3",
     "bluebird": "~1.2.4",
     "envc": "~1.0.0",
     "gpio": "0.2.x",
     "graceful-fs": "^3.0.5",
     "jwt-simple": "~0.2.0",
     "owjs": "0.1.x",
-    "rx": "^2.3.22",
+    "rx": "2.3.22",
     "ws": "~0.4.31"
   },
   "devDependencies": {
