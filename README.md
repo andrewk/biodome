@@ -1,159 +1,108 @@
 <img src="https://github.com/andrewk/node-biodome/raw/master/assets/logo-web.png">
 
-# biodome [![Build Status](https://secure.travis-ci.org/andrewk/biodome.png?branch=master)](http://travis-ci.org/andrewk/biodome)
+# Biodome
 
-**home automation for node.js**
+**Home Automation for node.js**
 
-  * [Overview](#overview)
-  * [Endpoints](#endpoints)
-    * [Drivers](#drivers)
-    * [IO](#io)
-  * [Application](#app)
-    * [Application Commands](#app-api) 
-  * [Server](#server)
-  * [Tests](#tests)
-  * [License](#license)
 
-## Overview
-This codebase provides the core service, providing hardware (aka `Endpoint`) interaction. It does not implement scheduling, environment compensation, or other use-case specific tools - these will be built as seperate services. Goals include:
+## Motivation
+This project started as an Arduino sensor logger and relay controller in 2008, which I wrote because I wanted to log garden data to CSV and was disappointed with the quality and versatility of existing Arduino projects solving similar problems. Over time rewriting the project in different languages and different programming styles became a non-trivial exercise I used to learn and evaluate the strengths and weaknesses of a language or programming approach. The first JavaScript implementation quickly showed extensive benefits over the multiple Arduino and Ruby implementations that proceeded it, leading me to continue development with the intention of releasing a maintained, documented codebase for others to utilize.
 
-  * Ease of adoption by people looking to assemble home/environment/industrial automation and monitoring systems.
-  * Service Oriented Architecure. Allow for deployment across machines where feasible.
-  * Prefer low-cost, highly replacable hardware.
-  * Ease of adaptation.
+## Goals
+  * Ease of adoption by people looking to assemble and program home/environment automation and monitoring systems.
+  * Service Oriented Architecture. Allow for deployment across multiple machines where feasible.
+  * Suitable for low-cost, highly replacable hardware.
+  * Ease of long-term maintenance and modification. Needs change, conditions change, and a Biodome installation needs to painlessly change. This is *automation you can live with*.
 
-<a name="endpoints"></a>
-## Endpoints
 
-An Endpoint is a device or sensor which the system owns. The IO could be I2C, 1-wire (owfs), UART, TCP, HTTP, shell calls; whatever you can access from node. An **Endpoint** instance contains a **Driver** instance, which contains an **IO** instance. The Driver and IO layers have clearly defined roles, and are composed together to simplify their implementations and allow re-use.
+## What does it do?
 
-<a name="drivers"></a>
-### Drivers
+Biodome provides a reactive interface to reading data (sensors, APIs, etc) and pushing commands to devices based on that data. Biodome's [API client](https://github.com/andrewk/biodome-client) exposes this same reactive interface to services running in different process or hardware. This enables you to move services such as scheduling, logging, and user interfaces out of your main biodome process, isolating the device and sensor controller from their potential instability and resource needs.
 
-The role of the driver is any data translation required to achieve the desired result at the endpoint hardware. One example is inverting the logic for relay boards which use HIGH as off, and LOW as on (eg: relay boards sold by Futurlec). For such an endpoint, you would use an inverting driver to send a 1 to the IO when a value of 0 is passed to the Endpoint's `write` method. Another example might be converting characters to suitable character codes for an LCD endpoint. 
-<a name="io"></a>
+By using [RxJS](https://github.com/Reactive-Extensions/RxJS) to provide an Observable interface to your sensor data, Biodome enables you to express complex conditions in a functional syntax and then act upon those by injecting commands into the command stream.
+
+Examples:
+
+```javascript
+// If the average temperature across 5 readings is above 30°c
+// and the humidity is less than 70%, turn on the mister.
+// Otherwise, ensure it's turned off.
+var mistingPumpCommands =
+  endpoints.id('temperature').
+    windowWithCount(5).
+    average(x => x.value).
+    combineLatest(
+      endpoints.id('humidity').pluck('value'),
+      (temp, humidity) => {
+        let val = (temp > 30 && humidity < 70) ? 1 : 0;
+        return biodome.command('mist-spray', val);
+      }
+    );
+
+commands.merge(mistingPumpCommands);
+```
+
+## System Design
+
+### Endpoint
+
+The Endpoints are the most important component. They consume instructions from a command stream, and produce a data stream. If the Endpoint is a device, such as a relay or LCD, you'll be most interested in its command stream. If it's a sensor, you'll be more interested in its data stream. Both of these streams are "hot observables" in RxJS terminology; instances of `Rx.Subject`.
+
+An Endpoint's identifying information is its `id` – which is expected to be unique – and its `type`, a free text property to allow you to group Endpoints within the system. Each endpoint requires a Driver, which in turn requires an IO instance. This composition is designed to enable a wide range of hardware support without constantly defining new types of Endpoints just to support minor differences.
+
+### EndpointCollection
+
+An EndpointCollection provides an interface for accessing Endpoint data streams by Endpoint `id` or by Endpoint `type`. For example:
+
+```javascript
+var biodome = require('biodome');
+
+var endpoints = biodome.endpoints([
+  biodome.endpoint({
+    'id': 'temperature',
+    'type': 'weather-sensor',
+    'driver': biodome.drivers.base(
+      biodome.io.owfs('/10.E89C8A020800/temperature')
+    )
+  }),
+
+  biodome.endpoint({
+    'id': 'windspeed',
+    'type': 'weather-sensor',
+    'driver': biodome.drivers.base(
+      biodome.io.owfs('/10.E89C8A020810/windspeed')
+    )
+  }),
+
+  biodome.endpoint({
+    'id': 'windspeed',
+    'type': 'weather-sensor',
+    'driver': biodome.drivers.base(
+      biodome.io.owfs('/10.E89C8A020802/humidity')
+    )
+  }),
+]);
+
+// data stream of temperature
+var temperature = endpoints.id('temperature');
+
+// merged data stream of all three
+var weatherData = endpoints.type('weather-sensor');
+```
+
+### Driver
+
+Each Endpoint needs a driver. The role of the driver is any data translation required by Endpoint hardware. One example is inverting the logic for normally closed (NC) relays, allowing you to write `1` for closed and `0` for open. Another example is converting characters to suitable character codes for an LCD endpoint. As these conversions are indifferent of the transmission protocol, they belong in the driver. The implementation of a driver is a `read` and `write` method that calls its IO instance's `read` or `write` method and does any required translation on the way through. Both methods must return promises.
+
 ### IO
 
-IO is responsible for handling the transmission protocol between the Biodome server and the Endpoint. It knows nothing of the devices or sensors it is providing for, only how to get a provided value down the wire or across the airwaves to an endpoint. In the case of multiplexing, a shared multiplexing IO instance would abstract away all that complexity form the drivers and endpoints, which would not need to make any account for their shared means of communication.
+Each Driver needs an IO instance. IO is responsible for handling the transmission protocol between the Biodome server and the Endpoint. GPIO, I2C, serial, file (eg: OWFS), HTTP, UDP, whatever you can think of. You can support different transports by providing an IO that implements `read` and `write`, returning promises for each. This design facilitates using existing callback-based protocol support, while also making it easy to pass any errors up to the Driver and in turn to the Endpoint where they can be handled (generally by injecting them into an error stream).
 
-A convenience API is provided for shorthand instantiation:
-```javascript
-var bio = require('biodome');
+## [TODO]: Document Server
 
-var temperature =  bio.endpoint({
-  "id" : "Outside Temperature",
-  "driver" : bio.drivers.base(bio.io.owserver('/10.E89C8A020800/temperature'))
-}));
+## Tests
+Run `npm test`
 
-temperature.read().then(function(result) {
-  console.log(result.value);
-});
-```
-
-Alternatively, this will give the same result:
-
-```javascript
-var Endpoint = require('biodome/lib/endpoint')
-  , BaseDriver = require('biodome/lib/drivers/base')
-  , OwserverIO = require('biodome/lib/io/owserver');
-
-var temperature =  new Endpoint({
-  "id" : "Outside Temperature",
-  "driver" : new BaseDriver(new OwserverIO('/10.E89C8A020800/temperature'))
-}));
-
-temperature.read().then(function(result) {
-  console.log(result.value);
-});
-```
-
-## App
-
-The App provides a JSON API for controlling endpoints and an API for selecting a subgroup of endpoints from its endpoint array
-
-### `endpoint` method
-
-```javascript
-// return single endpoint or null, lookup by properties
-var porchLight = app.endpoint({ 'id': 'porch', 'type': 'light' });
-
-porchLight.write(1).then(function(json) {
-  console.log('Light turned on at ' + json.updatedAt);
-});
-```
-
-### `endpointsWhere` method
-
-```javascript
-// return array of endpoints, lookup by properties
-var tempSensors = app.endpointsWhere({ 'type' : 'temp' });
-
-// update all their values and return their toJSON output
-Promise.all(tempSensors.map(function(ep) {
-  return ep.read();
-}).then(function(resultsJSON) {
-  console.log(resultsJSON);
-});
-```
-<a name="app-api"></a>
-### App Commands
-
-The `executeCommand` method expects a command object in the following format:
-
-```
-{
-  'selector' : {'id' : 'LCD1'},
-  'instruction' : {'type' : 'write', 'value' : 'Hello World' }
-}
-```
-
-`selector` is the same format as expected by the `endpointsWhere` method.
-`instruction` can have a `type` of `read` or `write`. If `write`, it is expected to also have `value` property
-
-```javascript
-app.executeCommand(commandData)
-  .then(function(result) {
-    // result is JSON data of all endpoints matched by commandData.selector
-  }).catch(function(error) {
-    // Bad command
-    console.log(error.message);
-  });
-```
-
-## Server
-
-### Command API (HTTP RPC)
-
-**`POST /token`**
-
-Expects username and password as POST body, returns JSON Web Token (JWT) for use with command requests
-
-**`POST /command`**
-
-```
-{
-  'token' : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjEwfQ.YKUBhlD4led4tbMrhRVoYsjewYs6fFH669ozZVga14E,
-  'command' : {
-    'selector' : {'id' : 'LCD1'},
-    'instruction' : {'type' : 'write', 'value' : 'Hello World' }
-  }
-}
-```
-
-The JWT token should be provided by [biodome-client](http://github.com/andrewk/biodome-client)
-
-### Status update feed (Websocket)
-
-To be documented...
-
-### Server security
-**TODO LOL YOLO**
-
-<a name="tests"></a>
-## Tests!
-Run `mocha` or `npm test`
-
-<a name="license"></a>
 ## License
 
 The MIT License (MIT)
@@ -177,5 +126,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
-
