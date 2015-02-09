@@ -17,12 +17,11 @@ var plantTemperature =
 // forced air below dew point turn on fan (write 1), 
 // else turn fan off (write 0)
 var thermalFanCommands = 
-  plantTemperature.  
-    filter(t => t > 27);
+  plantTemperature.
     combineLatest(
       endpoints.id('thermal-mass-temp'),
       (plantTemp, massTemp) => {
-        let val = (plantTemp - massTemp > 10) ? 1 : 0;
+        let val = (plantTemp > 27 && plantTemp - massTemp > 10) ? 1 : 0;
         return biodome.command('thermal-fan', val);
       }
     ).distinctUntilChanged();
