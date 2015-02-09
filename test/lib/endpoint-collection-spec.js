@@ -4,7 +4,7 @@ var chai = require('chai'),
   Rx = require('rx'),
   RxTest = require('../rx'),
   Endpoint = require("../../lib/endpoint"),
-  EndpointCollection = require("../../lib/endpoint-collection");
+  EndpointCollection = require("../../lib/endpoints");
 
 describe('EndpointCollection', function() {
   it('errors if constructor param is not array of endpoints', function() {
@@ -153,9 +153,9 @@ describe('EndpointCollection', function() {
 
       RxTest.assert(results.messages, [
         RxTest.onNext(100, ['foo']),
-        RxTest.onNext(150 ['bar']),
-        RxTest.onNext(200 ['foo']),
-        RxTest.onNext(250 ['bar']),
+        RxTest.onNext(150, ['bar']),
+        RxTest.onNext(200, ['foo']),
+        RxTest.onNext(250, ['bar']),
       ]); 
 
     });
