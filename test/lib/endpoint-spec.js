@@ -16,18 +16,58 @@ function options(base) {
 }
 
 describe('Endpoint', function() {
-  describe('#write', function() {
-      it('writes!');
+  describe('.write', function() {
+    var ep, spy, writeStub;
+
+    beforeEach(function() {
+      spy = sinon.spy();
+      writeStub = function(newValue) {
+        spy(newValue);
+        // resolve to something other than input to ensure correct value comes back
+        return Promise.resolve(1);
+      };
+
+      ep = new Endpoint({'driver': {'write': writeStub}});
+    });
+
+    it('calls .driver.write', function() {
+      ep.write(3);
+      expect(spy.called).to.be.true;
+      expect(spy.lastCall.args[0]).to.equal(3);
+    });
+
+    it('calls .broadcastData after resolving driver.write', function() {
+      ep.broadcastData = sinon.spy();
+      return expect(ep.write(3)).to.be.fulfilled.then(function() {
+        expect(ep.broadcastData.called).to.be.true;
+        expect(ep.broadcastData.lastCall.args[0].value).to.equal(1);
+      });
+    });
   });
 
-  describe('#read', function() {
-    it('returns IO value after successful driver read', function() {
-      var e = new Endpoint(options());
-      e.value = 0;
-      e.driver.io.lastWrite = 1234;
+  describe('.read', function() {
+    var ep, spy, readStub;
 
-      return expect(e.read()).to.be.fulfilled.then(function() {
-        expect(e.value).to.equal(1234);
+    beforeEach(function() {
+      spy = sinon.spy();
+      readStub = function() {
+        spy();
+        return Promise.resolve(1);
+      };
+
+      ep = new Endpoint({'driver': {'read': readStub}});
+    });
+
+    it('calls .driver.read', function() {
+      ep.read();
+      expect(spy.called).to.be.true;
+    });
+
+    it('calls .broadcastData after resolving driver.read', function() {
+      ep.broadcastData = sinon.spy();
+      return expect(ep.read()).to.be.fulfilled.then(function() {
+        expect(ep.broadcastData.called).to.be.true;
+        expect(ep.broadcastData.calls[0].args[0].value).to.equal(1);
       });
     });
   });
