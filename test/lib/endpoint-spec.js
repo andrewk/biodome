@@ -17,7 +17,7 @@ function options(base) {
 
 describe('Endpoint', function() {
   describe('#write', function() {
-      it('writes!'); // YOLO
+      it('writes!');
   });
 
   describe('#read', function() {
@@ -72,8 +72,8 @@ describe('Endpoint', function() {
     });
   });
 
-  describe('#commandObserver', function() {
-    it.skip('executes commands approved by its commandMatcher', function() {
+  describe('#subscribeToCommands', function() {
+    it('executes commands approved by its commandMatcher', function() {
       let opt = options();
       opt.commandMatcher = function() {
         return true;
@@ -88,7 +88,7 @@ describe('Endpoint', function() {
       ep.write = spy;
 
       var commands = new Rx.Subject();
-      commands.subscribe(ep.commandObserver);
+      ep.subscribeToCommands(commands);
 
       commands.onNext({
         'selector': {'id': 'foo'},
