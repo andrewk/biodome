@@ -9,9 +9,7 @@ chai.use(chaiAsPromised);
 
 function options(base) {
   base = base || {};
-  base.driver = require("../../lib/drivers/base").new(
-    require('../mocks/io').new(true)
-  );
+  base.driver = require("../../lib/drivers/base").new({});
   return base;
 }
 
@@ -70,6 +68,15 @@ describe('Endpoint', function() {
         expect(ep.broadcastData.calls[0].args[0].value).to.equal(1);
       });
     });
+  });
+
+  describe('.broadcastData', function() {
+    it('publishes to this.data.onNext');
+  });
+
+  describe('.destroy', function() {
+    it('clears auto refresh interval');
+    it('clears command stream subscription');
   });
 
   describe('auto-refresh', function() {

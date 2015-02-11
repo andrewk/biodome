@@ -1,28 +1,37 @@
-var chai = require('chai')
-  , expect = chai.expect
-  , io = require('../../mocks/io')
-  , driver = require('../../../lib/drivers/base');
+var chai = require('chai'),
+  expect = chai.expect,
+  sinon = require('sinon'),
+  driver = require('../../../lib/drivers/base'),
+  chaiAsPromised = require('chai-as-promised');
+
+chai.use(chaiAsPromised);
 
 describe('Driver::Base', function() {
   describe('#write', function() {
-    it('sends value to IO', function(done) {
-      var d = driver.new(io.new(true));
-      d.write(3456).then(function(value) {
-        expect(d.io.lastWrite).to.equal(3456);
-        done();
+    it('sends value to IO', function() {
+      var spy = sinon.spy();
+      var writeStub = function(newValue) {
+        spy(newValue);
+        return Promise.resolve();
+      };
+
+      var d = driver.new({ 'write': writeStub });
+      return expect(d.write(3456)).to.be.fulfilled.then(function(value) {
+        expect(io.write.lastCall.args[0]).to.equal(3456);
       });
     });
   });
 
   describe('#read', function() {
-    it('returns value from IO', function(done) {
-      var i = io.new(true);
-      var d = driver.new(i);
-      i.lastWrite = 1234;
-      d.read().then(function(value) {
-        expect(value).to.equal(1234);
-        done();
-      });
+    it('returns value from IO', function() {
+      var spy = sinon.spy();
+      var readStub = function() {
+        spy();
+        return Promise.resolve(1234);
+      };
+
+      var d = driver.new({ 'read': readStub });
+      expect(d.read()).to.eventually.equal(1234);
     });
   });
 });
