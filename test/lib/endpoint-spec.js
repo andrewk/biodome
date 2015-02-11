@@ -71,7 +71,24 @@ describe('Endpoint', function() {
   });
 
   describe('.broadcastData', function() {
-    it('publishes to this.data.onNext');
+    it('publishes to this.data.onNext', function() {
+      var spy = sinon.spy();
+      var ep = new Endpoint(
+        options({
+          'id': 4,
+          'type': 1,
+          'dataStream': {
+            'onNext': spy
+          }
+        })
+      );
+
+      ep.broadcastData(123);
+      expect(spy.lastCall.args[0].value).to.equal(123);
+      expect(spy.lastCall.args[0].id).to.equal(4);
+      expect(spy.lastCall.args[0].type).to.equal(1);
+      expect(spy.lastCall.args[0].timestamp).to.be.ok;
+    });
   });
 
   describe('.destroy', function() {
