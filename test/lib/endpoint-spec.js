@@ -92,8 +92,19 @@ describe('Endpoint', function() {
   });
 
   describe('.destroy', function() {
-    it('clears auto refresh interval');
-    it('clears command stream subscription');
+    it('clears auto refresh interval', function() {
+      clearInterval = sinon.spy();
+      var e = new Endpoint(options({'refreshRate': 500}));
+      e.destroy();
+      expect(clearInterval.called).to.be.true;
+    });
+
+    it('clears command stream subscription', function() {
+      var e = new Endpoint(options());
+      e.commandSubscription = { 'dispose': sinon.spy() };
+      e.destroy();
+      expect(e.commandSubscription.dispose.called).to.be.true;
+    });
   });
 
   describe('auto-refresh', function() {
