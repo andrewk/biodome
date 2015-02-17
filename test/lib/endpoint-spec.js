@@ -2,74 +2,25 @@ var chai = require('chai'),
   expect = chai.expect,
   sinon = require('sinon'),
   Rx = require('rx'),
-  Endpoint = require("../../lib/endpoint");
+  rewire = require('rewire'),
+  Endpoint = rewire("../../lib/endpoint");
 
 var chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
 function options(base) {
   base = base || {};
-  base.driver = require("../../lib/drivers/base").new({});
+  base.id = base.id || 123,
+  base.type = base.type || 'sensor',
+  base.commandMatcher = base.commandMatcher || () => true;
+  base.driver = require("../../lib/drivers/base").new({
+    'read': () => Promise.resolve(1),
+    'write': (val) => Promise.resolve(val)  
+  });
   return base;
 }
 
 describe('Endpoint', function() {
-  describe('.write', function() {
-    var ep, spy, writeStub;
-
-    beforeEach(function() {
-      spy = sinon.spy();
-      writeStub = function(newValue) {
-        spy(newValue);
-        // resolve to something other than input to ensure correct value comes back
-        return Promise.resolve(1);
-      };
-
-      ep = new Endpoint({'driver': {'write': writeStub}});
-    });
-
-    it('calls .driver.write', function() {
-      ep.write(3);
-      expect(spy.called).to.be.true;
-      expect(spy.lastCall.args[0]).to.equal(3);
-    });
-
-    it('calls .broadcastData after resolving driver.write', function() {
-      ep.broadcastData = sinon.spy();
-      return expect(ep.write(3)).to.be.fulfilled.then(function() {
-        expect(ep.broadcastData.called).to.be.true;
-        expect(ep.broadcastData.lastCall.args[0].value).to.equal(1);
-      });
-    });
-  });
-
-  describe('.read', function() {
-    var ep, spy, readStub;
-
-    beforeEach(function() {
-      spy = sinon.spy();
-      readStub = function() {
-        spy();
-        return Promise.resolve(1);
-      };
-
-      ep = new Endpoint({'driver': {'read': readStub}});
-    });
-
-    it('calls .driver.read', function() {
-      ep.read();
-      expect(spy.called).to.be.true;
-    });
-
-    it('calls .broadcastData after resolving driver.read', function() {
-      ep.broadcastData = sinon.spy();
-      return expect(ep.read()).to.be.fulfilled.then(function() {
-        expect(ep.broadcastData.called).to.be.true;
-        expect(ep.broadcastData.calls[0].args[0].value).to.equal(1);
-      });
-    });
-  });
-
   describe('.broadcastData', function() {
     it('publishes to this.data.onNext', function() {
       var spy = sinon.spy();
@@ -92,13 +43,6 @@ describe('Endpoint', function() {
   });
 
   describe('.destroy', function() {
-    it('clears auto refresh interval', function() {
-      clearInterval = sinon.spy();
-      var e = new Endpoint(options({'refreshRate': 500}));
-      e.destroy();
-      expect(clearInterval.called).to.be.true;
-    });
-
     it('clears command stream subscription', function() {
       var e = new Endpoint(options());
       e.commandSubscription = { 'dispose': sinon.spy() };
@@ -107,7 +51,7 @@ describe('Endpoint', function() {
     });
   });
 
-  describe('auto-refresh', function() {
+  describe.skip('auto-refresh', function() {
     it('creates up an interval timer if endpoint has a refresh rate', function() {
       setInterval = sinon.spy();
       var e = new Endpoint(options({'refreshRate': 500}));
@@ -135,7 +79,7 @@ describe('Endpoint', function() {
         var spy = sinon.spy();
         var readStub = function() {
           spy();
-          return Promise.resolve(1);
+          return Promise.resolve(1)
         };
 
         var e = new Endpoint({'refreshRate': 500, 'driver': {'read': readStub}});
@@ -147,12 +91,9 @@ describe('Endpoint', function() {
     });
   });
 
-  describe('#subscribeToCommands', function() {
-    it('executes commands approved by its commandMatcher', function() {
+  describe('.subscribeToCommands', function() {
+    it('executes write commands approved by its commandMatcher', function() {
       let opt = options();
-      opt.commandMatcher = function() {
-        return true;
-      };
 
       var ep = new Endpoint(opt);
       var spy = sinon.spy();
@@ -160,7 +101,7 @@ describe('Endpoint', function() {
         spy(value);
         return Promise.resolve(1);
       };
-      ep.write = spy;
+      ep.driver.write = writeStub;
 
       var commands = new Rx.Subject();
       ep.subscribeToCommands(commands);
@@ -173,9 +114,63 @@ describe('Endpoint', function() {
       expect(spy.called).to.be.true;
       expect(spy.firstCall.args[0]).to.equal('qux');
     });
+
+    it('executes read commands approved by its commandMatcher', function() {
+      let opt = options();
+
+      var ep = new Endpoint(opt);
+      var spy = sinon.spy();
+      var readStub = function(value) {
+        spy(value);
+        return Promise.resolve(1);
+      };
+      ep.driver.read = readStub;
+
+      var commands = new Rx.Subject();
+      ep.subscribeToCommands(commands);
+
+      commands.onNext({
+        'selector': {'id': 'foo'},
+        'instruction': {'type': 'read'}
+      });
+
+      expect(spy.called).to.be.true;
+    });
   });
 
   describe('error handling', function() {
-    it('publishes IO errors to the error stream');
+    it('logs driver error during write', function() {
+      const errorSpy = sinon.spy();
+      Endpoint.__set__('log', { 'error': errorSpy });
+
+      const ep = new Endpoint(options());
+      const writeStub = function(value) {
+        return Promise.reject(0);
+      };
+
+      ep.driver.write = writeStub;
+
+      expect(ep.write(1)).to.be.rejected.then(function() {
+        expect(errorSpy.called).to.be.true;
+        expect(errorSpy.lastCall.args.source).to.equal('endpoint:123');
+      });
+    });
+
+    it('logs driver error during read', function() {
+      const errorSpy = sinon.spy();
+      Endpoint.__set__('log', { 'error': errorSpy });
+
+      const ep = new Endpoint(options());
+      const readStub = function(value) {
+        return Promise.reject(0);
+      };
+
+      ep.driver.read = readStub;
+
+      expect(ep.read(1)).to.be.rejected.then(function() {
+        expect(errorSpy.called).to.be.true;
+      });
+    });
   });
+
 });

@@ -29,12 +29,13 @@
     "ws": "~0.4.31"
   },
   "devDependencies": {
-    "chai": "1.8.x",
-    "mocha": "1.14.x",
-    "sinon": "1.7.x",
-    "supertest": "0.8.x",
     "bunyan": "~0.22.1",
-    "chai-as-promised": "~4.1.1"
+    "chai": "1.8.x",
+    "chai-as-promised": "~4.1.1",
+    "mocha": "1.14.x",
+    "rewire": "^2.3.0",
+    "sinon": "1.7.x",
+    "supertest": "0.8.x"
   },
   "repository": {
     "type": "git",
