@@ -1,28 +1,37 @@
-var chai = require('chai')
-  , expect = chai.expect
-  , io = require('../../mocks/io')
-  , driver = require('../../../lib/drivers/inverted');
+var chai = require('chai'),
+  expect = chai.expect,
+  sinon = require('sinon'),
+  driver = require('../../../lib/drivers/inverted'),
+  chaiAsPromised = require('chai-as-promised');
 
-describe('Driver::Base', function() {
+chai.use(chaiAsPromised);
+
+describe('Driver::Inverted', function() {
   describe('#write', function() {
-    it('sends inverted value to IO', function(done) {
-      var d = driver.new(io.new(true));
-      d.write(1).then(function(value) {
-        expect(d.io.lastWrite).to.equal(0);
-        done();
+    it('sends inverted value to IO', function() {
+      var spy = sinon.spy();
+      var writeStub = function(newValue) {
+        spy(newValue);
+        return Promise.resolve();
+      };
+
+      var d = driver.new({ 'write': writeStub });
+      return expect(d.write(1)).to.be.fulfilled.then(function(value) {
+        expect(io.write.lastCall.args[0]).to.equal(0);
       });
     });
   });
 
   describe('#read', function() {
-    it('returns inverted value from IO', function(done) {
-      var i = io.new(true);
-      var d = driver.new(i);
-      i.lastWrite = 1;
-      d.read().then(function(value) {
-        expect(value).to.equal(0);
-        done();
-      });
+    it('returns inverted value from IO', function() {
+      var spy = sinon.spy();
+      var readStub = function() {
+        spy();
+        return Promise.resolve(0);
+      };
+
+      var d = driver.new({'read': readStub });
+      expect(d.read()).to.eventually.equal(1);
     });
   });
 });

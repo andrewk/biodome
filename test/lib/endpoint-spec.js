@@ -1,81 +1,205 @@
-var chai = require("chai")
-  , expect = chai.expect
-  , Endpoint = require("../../lib/endpoint");
+var chai = require('chai'),
+  expect = chai.expect,
+  sinon = require('sinon'),
+  Rx = require('rx'),
+  rewire = require('rewire'),
+  Endpoint = rewire("../../lib/endpoint");
 
 var chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-function options() {
-  return { 
-    driver : require("../../lib/drivers/base").new(
-      require('../mocks/io').new(true)
-    )
-  };
+function options(base) {
+  base = base || {};
+  base.id = base.id || 123,
+  base.type = base.type || 'sensor',
+  base.commandMatcher = base.commandMatcher || () => true;
+  base.driver = require("../../lib/drivers/base").new({
+    'read': () => Promise.resolve(1),
+    'write': (val) => Promise.resolve(val)  
+  });
+  return base;
 }
 
 describe('Endpoint', function() {
-  describe('#write', function() {
-    it('updates its value after successful driver write', function() {
-      var e = new Endpoint(options());
-      e.value = 0;
+  describe('.broadcastData', function() {
+    it('publishes to this.data.onNext', function() {
+      var spy = sinon.spy();
+      var ep = new Endpoint(
+        options({
+          'id': 4,
+          'type': 1,
+          'dataStream': {
+            'onNext': spy
+          }
+        })
+      );
 
-      return expect(e.write(1)).to.be.fulfilled.then(function() {
-        expect(e.value).to.equal(1);
-      });
-    });
-
-    it('sets busy to false after successful driver write', function() {
-      var e = new Endpoint(options());
-      e.value = 0;
-      e.busy = true;
-
-      return expect(e.write(1)).to.be.fulfilled.then(function() {
-        expect(e.busy).to.be.false;
-      });
-    });
-
-    it('remains busy after driver write error', function() {
-      var e = new Endpoint(options());
-      e.value = 0;
-      e.busy = true;
-      e.driver.io.alwaysResolve = false;
-
-      return expect(e.write(1)).to.be.rejected.then(function() {
-        expect(e.busy).to.be.true;
-      });
+      ep.broadcastData(123);
+      expect(spy.lastCall.args[0].value).to.equal(123);
+      expect(spy.lastCall.args[0].id).to.equal(4);
+      expect(spy.lastCall.args[0].type).to.equal(1);
+      expect(spy.lastCall.args[0].timestamp).to.be.ok;
     });
   });
 
-  describe('#read', function() {
-    it('returns IO value after successful driver read', function() {
+  describe('.destroy', function() {
+    it('clears command stream subscription', function() {
       var e = new Endpoint(options());
-      e.value = 0;
-      e.driver.io.lastWrite = 1234;
+      e.commandSubscription = { 'dispose': sinon.spy() };
+      e.destroy();
+      expect(e.commandSubscription.dispose.called).to.be.true;
+    });
+  });
 
-      return expect(e.read()).to.be.fulfilled.then(function() {
-        expect(e.value).to.equal(1234);
+  describe('auto-refresh', function() {
+    var clock;
+
+    before(function() {
+      clock = sinon.useFakeTimers();
+    });
+
+    after(function() {
+      clock.restore();
+    });
+
+    it('calls endpoint.read', function() {
+      const spy = sinon.spy();
+      const ep = new Endpoint(options({'refreshRate': 500}));
+      ep.read = spy;
+      expect(spy.called).to.be.false;
+      clock.tick(501);
+      expect(spy.called).to.be.true;
+    });
+  });
+
+  describe('.subscribeToCommands', function() {
+    it('executes write commands approved by its commandMatcher', function() {
+      let opt = options();
+
+      var ep = new Endpoint(opt);
+      var spy = sinon.spy();
+      var writeStub = function(value) {
+        spy(value);
+        return Promise.resolve(1);
+      };
+      ep.driver.write = writeStub;
+
+      var commands = new Rx.Subject();
+      ep.subscribeToCommands(commands);
+
+      commands.onNext({
+        'selector': {'id': 'foo'},
+        'instruction': {'type': 'write', 'value': 'qux'}
+      });
+
+      expect(spy.called).to.be.true;
+      expect(spy.firstCall.args[0]).to.equal('qux');
+    });
+
+    it('executes read commands approved by its commandMatcher', function() {
+      let opt = options();
+
+      var ep = new Endpoint(opt);
+      var spy = sinon.spy();
+      var readStub = function(value) {
+        spy(value);
+        return Promise.resolve(1);
+      };
+      ep.driver.read = readStub;
+
+      var commands = new Rx.Subject();
+      ep.subscribeToCommands(commands);
+
+      commands.onNext({
+        'selector': {'id': 'foo'},
+        'instruction': {'type': 'read'}
+      });
+
+      expect(spy.called).to.be.true;
+    });
+  });
+
+  describe('error handling', function() {
+    it('logs driver error during write', function() {
+      const errorSpy = sinon.spy();
+      Endpoint.__set__('log', { 'error': errorSpy });
+
+      const ep = new Endpoint(options());
+      const writeStub = function(value) {
+        return Promise.reject(0);
+      };
+
+      ep.driver.write = writeStub;
+
+      expect(ep.write(1)).to.be.rejected.then(function() {
+        expect(errorSpy.called).to.be.true;
+        expect(errorSpy.lastCall.args.source).to.equal('endpoint:123');
       });
     });
 
-    it('sets busy to false after successful driver read', function() {
-      var e = new Endpoint(options());
-      e.value = 0;
-      e.busy = true;
+    it('logs driver error during read', function() {
+      const errorSpy = sinon.spy();
+      Endpoint.__set__('log', { 'error': errorSpy });
 
-      return expect(e.read()).to.be.fulfilled.then(function() {
-        expect(e.busy).to.be.false;
+      const ep = new Endpoint(options());
+      const readStub = function(value) {
+        return Promise.reject(0);
+      };
+
+      ep.driver.read = readStub;
+
+      expect(ep.read(1)).to.be.rejected.then(function() {
+        expect(errorSpy.called).to.be.true;
       });
     });
 
-    it('remains busy after driver read error', function() {
-      var e = new Endpoint(options());
-      e.value = 0;
-      e.busy = true;
-      e.driver.io.alwaysResolve = false;
+    describe('hardware timeout', function() {
+      var clock;
 
-      return expect(e.read()).to.be.rejected.then(function() {
-        expect(e.busy).to.be.true;
+      before(function() {
+        clock = sinon.useFakeTimers();
+      });
+
+      after(function() {
+        clock.restore();
+      });
+
+      it('write times out after this.writeTimeout', function() {
+        const errorSpy = sinon.spy();
+        Endpoint.__set__('log', { 'error': errorSpy });
+
+        const ep = new Endpoint(options({'writeTimeout': 200}));
+        const stub = function(value) {
+          return new Promise(function(res, rej) {});
+        };
+
+        ep.driver.write = stub;
+        const writePromise = ep.write(1234);
+        clock.tick(201);
+        expect(writePromise).to.be.rejected.then(function() {
+          expect(errorSpy.called).to.be.true;
+          exoect(errorSpy.lastCall.args.message).to.equal('Exceeded maximum write execution time');
+        });
+      });
+
+      it('read times out after this.readTimeout', function() {
+        const errorSpy = sinon.spy();
+        Endpoint.__set__('log', { 'error': errorSpy });
+
+        const ep = new Endpoint(options({'readTimeout': 200}));
+        const stub = function(value) {
+          return new Promise(function(res, rej) {});
+        };
+
+        ep.driver.read = stub;
+        const readPromise = ep.read(1234);
+        clock.tick(201);
+        expect(readPromise).to.be.rejected.then(function() {
+          expect(errorSpy.called).to.be.true;
+          exoect(errorSpy.lastCall.args.message).to.equal('Exceeded maximum read execution time');
+        });
       });
     });
+
   });
 });
