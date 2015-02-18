@@ -51,43 +51,24 @@ describe('Endpoint', function() {
     });
   });
 
-  describe.skip('auto-refresh', function() {
-    it('creates up an interval timer if endpoint has a refresh rate', function() {
-      setInterval = sinon.spy();
-      var e = new Endpoint(options({'refreshRate': 500}));
-      expect(setInterval.called).to.be.true;
+  describe('auto-refresh', function() {
+    var clock;
+
+    before(function() {
+      clock = sinon.useFakeTimers();
     });
 
-    it('doesn\'t create an interval timer if endpoint has no refresh rate', function() {
-      setInterval = sinon.spy();
-      var e = new Endpoint(options());
-      expect(setInterval.called).to.be.false;
+    after(function() {
+      clock.restore();
     });
 
-    describe('active refresh', function() {
-      var clock;
-
-      before(function() {
-        clock = sinon.useFakeTimers();
-      });
-
-      after(function() {
-        clock.restore();
-      });
-
-      it('calls endpoint.read', function() {
-        var spy = sinon.spy();
-        var readStub = function() {
-          spy();
-          return Promise.resolve(1)
-        };
-
-        var e = new Endpoint({'refreshRate': 500, 'driver': {'read': readStub}});
-        expect(spy.called).to.be.false;
-        clock.tick(501);
-        expect(spy.called).to.be.true;
-        e.destroy();
-      });
+    it('calls endpoint.read', function() {
+      const spy = sinon.spy();
+      const ep = new Endpoint(options({'refreshRate': 500}));
+      ep.read = spy;
+      expect(spy.called).to.be.false;
+      clock.tick(501);
+      expect(spy.called).to.be.true;
     });
   });
 
