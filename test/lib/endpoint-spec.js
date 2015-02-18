@@ -171,6 +171,54 @@ describe('Endpoint', function() {
         expect(errorSpy.called).to.be.true;
       });
     });
-  });
 
+    describe('hardware timeout', function() {
+      var clock;
+
+      before(function() {
+        clock = sinon.useFakeTimers();
+      });
+
+      after(function() {
+        clock.restore();
+      });
+
+      it('write times out after this.writeTimeout', function() {
+        const errorSpy = sinon.spy();
+        Endpoint.__set__('log', { 'error': errorSpy });
+
+        const ep = new Endpoint(options({'writeTimeout': 200}));
+        const stub = function(value) {
+          return new Promise(function(res, rej) {});
+        };
+
+        ep.driver.write = stub;
+        const writePromise = ep.write(1234);
+        clock.tick(201);
+        expect(writePromise).to.be.rejected.then(function() {
+          expect(errorSpy.called).to.be.true;
+          exoect(errorSpy.lastCall.args.message).to.equal('Exceeded maximum write execution time');
+        });
+      });
+
+      it('read times out after this.readTimeout', function() {
+        const errorSpy = sinon.spy();
+        Endpoint.__set__('log', { 'error': errorSpy });
+
+        const ep = new Endpoint(options({'readTimeout': 200}));
+        const stub = function(value) {
+          return new Promise(function(res, rej) {});
+        };
+
+        ep.driver.read = stub;
+        const readPromise = ep.read(1234);
+        clock.tick(201);
+        expect(readPromise).to.be.rejected.then(function() {
+          expect(errorSpy.called).to.be.true;
+          exoect(errorSpy.lastCall.args.message).to.equal('Exceeded maximum read execution time');
+        });
+      });
+    });
+
+  });
 });
