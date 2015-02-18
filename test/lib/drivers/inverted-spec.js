@@ -6,7 +6,7 @@ var chai = require('chai'),
 
 chai.use(chaiAsPromised);
 
-describe('Driver::Base', function() {
+describe('Driver::Inverted', function() {
   describe('#write', function() {
     it('sends inverted value to IO', function() {
       var spy = sinon.spy();
