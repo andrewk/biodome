@@ -17,7 +17,7 @@ describe('Driver::Base', function() {
 
       var d = driver.new({ 'write': writeStub });
       return expect(d.write(3456)).to.be.fulfilled.then(function(value) {
-        expect(io.write.lastCall.args[0]).to.equal(3456);
+        expect(spy.lastCall.args[0]).to.equal(3456);
       });
     });
   });

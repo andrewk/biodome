@@ -1,7 +1,7 @@
 {
   "name": "Biodome",
   "description": "Home automation you can live with",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "author": "Andrew Krespanis",
   "license": "MIT",
   "homepage": "https://github.com/andrewk/biodome",
@@ -14,28 +14,27 @@
     "1wire"
   ],
   "scripts": {
-    "start": "6to5-node examples/basic.js",
-    "test": "mocha --compilers js:6to5/register"
+    "start": "babel-node examples/basic.js",
+    "test": "mocha --compilers js:babel/register"
   },
   "dependencies": {
-    "6to5": "^3.5.3",
-    "bluebird": "~1.2.4",
-    "envc": "~1.0.0",
+    "babel": "^4.7.3",
+    "bluebird": "^2.0.0",
+    "envc": "^1.0.0",
     "gpio": "0.2.x",
     "graceful-fs": "^3.0.5",
     "jwt-simple": "~0.2.0",
     "owjs": "0.1.x",
     "rx": "2.3.22",
-    "ws": "~0.4.31"
+    "ws": "~0.7.0"
   },
   "devDependencies": {
-    "bunyan": "~0.22.1",
-    "chai": "1.8.x",
-    "chai-as-promised": "~4.1.1",
-    "mocha": "1.14.x",
+    "chai": "^2.0.0",
+    "chai-as-promised": "^4.3.0",
+    "mocha": "^2.0.0",
     "rewire": "^2.3.0",
-    "sinon": "1.7.x",
-    "supertest": "0.8.x"
+    "sinon": "~1.13.x",
+    "supertest": "~0.8.x"
   },
   "repository": {
     "type": "git",

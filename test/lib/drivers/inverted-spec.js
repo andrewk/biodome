@@ -17,7 +17,7 @@ describe('Driver::Inverted', function() {
 
       var d = driver.new({ 'write': writeStub });
       return expect(d.write(1)).to.be.fulfilled.then(function(value) {
-        expect(io.write.lastCall.args[0]).to.equal(0);
+        expect(spy.lastCall.args[0]).to.equal(0);
       });
     });
   });
