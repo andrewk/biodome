@@ -1,11 +1,11 @@
-var chai = require('chai'),
+const chai = require('chai'),
   expect = chai.expect,
   sinon = require('sinon'),
   Rx = require('rx'),
   rewire = require('rewire'),
   Endpoint = rewire("../../lib/endpoint");
 
-var chaiAsPromised = require('chai-as-promised');
+const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
 function options(base) {
@@ -21,30 +21,28 @@ function options(base) {
 }
 
 describe('Endpoint', function() {
-  describe('.broadcastData', function() {
-    it('publishes to this.data.onNext', function() {
-      var spy = sinon.spy();
-      var ep = new Endpoint(
-        options({
-          'id': 4,
-          'type': 1,
-          'dataStream': {
-            'onNext': spy
-          }
-        })
-      );
+  it('emits data event', function() {
+    const spy = sinon.spy();
+    const ep = new Endpoint(
+      options({
+        'id': 4,
+        'type': 1,
+      })
+    );
 
-      ep.broadcastData(123);
-      expect(spy.lastCall.args[0].value).to.equal(123);
-      expect(spy.lastCall.args[0].id).to.equal(4);
-      expect(spy.lastCall.args[0].type).to.equal(1);
-      expect(spy.lastCall.args[0].timestamp).to.be.ok;
-    });
+    ep.on('data', spy);
+    ep.broadcastData(123);
+
+    const args = spy.lastCall.args[0];
+    expect(args.value).to.equal(123);
+    expect(args.id).to.equal(4);
+    expect(args.type).to.equal(1);
+    expect(args.timestamp).to.be.ok;
   });
 
   describe('.destroy', function() {
     it('clears command stream subscription', function() {
-      var e = new Endpoint(options());
+      const e = new Endpoint(options());
       e.commandSubscription = { 'dispose': sinon.spy() };
       e.destroy();
       expect(e.commandSubscription.dispose.called).to.be.true;
@@ -52,7 +50,7 @@ describe('Endpoint', function() {
   });
 
   describe('auto-refresh', function() {
-    var clock;
+    let clock;
 
     before(function() {
       clock = sinon.useFakeTimers();
@@ -76,15 +74,15 @@ describe('Endpoint', function() {
     it('executes write commands approved by its commandMatcher', function() {
       let opt = options();
 
-      var ep = new Endpoint(opt);
-      var spy = sinon.spy();
-      var writeStub = function(value) {
+      const ep = new Endpoint(opt);
+      const spy = sinon.spy();
+      const writeStub = function(value) {
         spy(value);
         return Promise.resolve(1);
       };
       ep.driver.write = writeStub;
 
-      var commands = new Rx.Subject();
+      const commands = new Rx.Subject();
       ep.subscribeToCommands(commands);
 
       commands.onNext({
@@ -99,15 +97,15 @@ describe('Endpoint', function() {
     it('executes read commands approved by its commandMatcher', function() {
       let opt = options();
 
-      var ep = new Endpoint(opt);
-      var spy = sinon.spy();
-      var readStub = function(value) {
+      const ep = new Endpoint(opt);
+      const spy = sinon.spy();
+      const readStub = function(value) {
         spy(value);
         return Promise.resolve(1);
       };
       ep.driver.read = readStub;
 
-      var commands = new Rx.Subject();
+      const commands = new Rx.Subject();
       ep.subscribeToCommands(commands);
 
       commands.onNext({
@@ -154,7 +152,7 @@ describe('Endpoint', function() {
     });
 
     describe('hardware timeout', function() {
-      var clock;
+      let clock;
 
       before(function() {
         clock = sinon.useFakeTimers();
