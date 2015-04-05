@@ -64,7 +64,7 @@ describe('Endpoint', function() {
   });
 
   describe('subscribeToCommands', function() {
-    it('executes write commands approved by its commandMatcher', function() {
+    it('executes write commands approved by its commandMatcher', function(done) {
       const ep = new Endpoint(options());
       const spy = sinon.spy();
 
@@ -77,16 +77,19 @@ describe('Endpoint', function() {
       const commandEvents = new EventEmitter();
       ep.subscribeToCommands(commandStream(commandEvents));
 
-      commandEvents.emit('command', {
-        'selector': {'id': 'foo'},
-        'instruction': {'type': 'write', 'value': 'qux'}
-      });
+      process.nextTick(() => {
+        commandEvents.emit('command', {
+          'selector': {'id': 'foo'},
+          'instruction': {'type': 'write', 'value': 'qux'}
+        });
 
-      expect(spy.called).to.be.true;
-      expect(spy.firstCall.args[0]).to.equal('qux');
+        expect(spy.called).to.be.true;
+        expect(spy.firstCall.args[0]).to.equal('qux');
+        done();
+      });
     });
 
-    it('executes read commands approved by its commandMatcher', function() {
+    it('executes read commands approved by its commandMatcher', function(done) {
       let opt = options();
 
       const ep = new Endpoint(opt);
@@ -100,12 +103,15 @@ describe('Endpoint', function() {
       const commandEvents = new EventEmitter();
       ep.subscribeToCommands(commandStream(commandEvents));
 
-      commandEvents.emit('command', {
-        'selector': {'id': 'foo'},
-        'instruction': {'type': 'read'}
-      });
+      process.nextTick(() => {
+        commandEvents.emit('command', {
+          'selector': {'id': 'foo'},
+          'instruction': {'type': 'read'}
+        });
 
-      expect(spy.called).to.be.true;
+        expect(spy.called).to.be.true;
+        done();
+      });
     });
   });
 
