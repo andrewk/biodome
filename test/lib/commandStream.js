@@ -8,8 +8,10 @@ describe('commandStream', function() {
     const events = new EventEmitter();
     const stream = commandStream(events);
     const spy = sinon.spy();
-    stream.onValue(spy);
-    events.emit('command', 'foo');
-    chai.expect(spy.called).to.be.true;
+    stream.observe(spy);
+    process.nextTick(() => {
+      events.emit('command', 'foo');
+      chai.expect(spy.called).to.be.true;
+    });
   });
 });
