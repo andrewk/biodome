@@ -19,28 +19,7 @@ This project started as an Arduino sensor logger and relay controller in 2008, w
 
 Biodome provides a reactive interface to reading data (sensors, APIs, etc) and pushing commands to devices based on that data. Biodome's [API client](https://github.com/andrewk/biodome-client) exposes this same reactive interface to services running in different process or hardware. This enables you to move services such as scheduling, logging, and user interfaces out of your main biodome process, isolating the device and sensor controller from their potential instability and resource needs.
 
-By using [RxJS](https://github.com/Reactive-Extensions/RxJS) to provide an Observable interface to your sensor data, Biodome enables you to express complex conditions in a functional syntax and then act upon those by injecting commands into the command stream.
-
-Examples:
-
-```javascript
-// If the average temperature across 5 readings is above 30°c
-// and the humidity is less than 70%, turn on the mister.
-// Otherwise, ensure it's turned off.
-var mistingPumpCommands =
-  endpoints.id('temperature').
-    windowWithCount(5).
-    average(x => x.value).
-    combineLatest(
-      endpoints.id('humidity').pluck('value'),
-      (temp, humidity) => {
-        let val = (temp > 30 && humidity < 70) ? 1 : 0;
-        return biodome.command('mist-spray', val);
-      }
-    );
-
-commands.merge(mistingPumpCommands);
-```
+By using [most](https://github.com/cujojs/most) to provide an Observable interface to your sensor data, Biodome enables you to express complex conditions in a functional syntax and then act upon those by injecting commands into the command stream.
 
 ## System Design
 
