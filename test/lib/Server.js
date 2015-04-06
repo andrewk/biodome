@@ -1,10 +1,9 @@
-var chai = require('chai'),
-  sinon = require('sinon'),
-  request = require('supertest'),
-  ws = require('ws'),
-  expect = chai.expect,
-  Server = require('../../lib/server'),
-  srv;
+import { expect } from 'chai';
+import sinon from 'sinon';
+import request from 'supertest';
+import ws from 'ws';
+import Server from '../../lib/Server';
+
 describe('Server', function() {
   describe('connection', function() {
     it('refuses access without correct access token');
@@ -12,7 +11,7 @@ describe('Server', function() {
   });
 
   describe('Correct handlers are used', function() {
-    var requestSpy, socketSpy;
+    var requestSpy, socketSpy, srv;
 
     beforeEach(function() {
       requestSpy = sinon.spy();
