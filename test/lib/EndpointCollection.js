@@ -1,163 +1,54 @@
-var chai = require('chai'),
-  expect = chai.expect,
-  sinon = require('sinon'),
-  Rx = require('rx'),
-  RxTest = require('../rx'),
-  Endpoint = require("../../lib/endpoint"),
-  EndpointCollection = require("../../lib/endpoints");
+import { expect } from 'chai';
+import sinon from 'sinon';
+import EventEmitter from 'eventemitter3';
+import Endpoint from '../../lib/Endpoint';
+import EndpointCollection from '../../lib/EndpointCollection';
+import params from '../endpoint-params';
 
 describe('EndpointCollection', function() {
+  let events;
+  let collection;
+  let endpoints;
+
+  beforeEach(function() {
+    events = new EventEmitter();
+    collection = new EndpointCollection(events);
+    endpoints = [
+      new Endpoint(params({ id: 1, type: 'foo' })),   
+      new Endpoint(params({ id: 2, type: 'foo' })),   
+      new Endpoint(params({ id: 3, type: 'bar' })),   
+    ];
+    collection.setEndpoints(endpoints);
+  })
+
   it('errors if constructor param is not array of endpoints', function() {
-    var badConstruct = function() {
-      var dummy = new EndpointCollection([{}, 1, 4]);
-    }; 
+    const coll = new EndpointCollection();
+    const badConstruct = function() {
+      coll.setEndpoints([{}]);
+    };
 
     expect(badConstruct).to.throw(TypeError, /Invalid object/);
   });
 
-  describe('lookup by id', function() {
-    var ep = new Endpoint({'id':'foo', 'type':'qux'});
-    var stream = ep.data;
-    var collection = new EndpointCollection([ep]);
-
-    it('returns datastream by ID', function() {
-      expect(collection.id('foo')).to.equal(stream);
-    });
-  });
-
-
-  describe('lookup by type', function() {
-    var scheduler, collection;
-
-    beforeEach(function() {
-      scheduler = new Rx.TestScheduler();
-
-      let stream1 = scheduler.createHotObservable(
-          RxTest.onNext(100, 'abc'),
-          RxTest.onNext(200, 'def'),
-          RxTest.onCompleted(500)
-      );
-      let stream2 = scheduler.createHotObservable(
-          RxTest.onNext(150, '123'),
-          RxTest.onNext(250, '456'),
-          RxTest.onCompleted(500)
-      );
-
-      let stream3 = scheduler.createHotObservable(
-          RxTest.onNext(125, 'xyz'),
-          RxTest.onNext(225, 'qwerty'),
-          RxTest.onCompleted(500)
-      );
-
-      collection = new EndpointCollection([
-        new Endpoint({
-          'id': 1,
-          'type': 'foo',
-          'dataStream': stream1
-        }),
-        new Endpoint({
-          'id': 2,
-          'type': 'foo',
-          'dataStream': stream2
-        }),
-        new Endpoint({
-          'id': 3,
-          'type': 'qux',
-          'dataStream': stream3
-        })
-      ]);
-    });
-    
-    it('returns merged datastream for multiple matches', function() {
-      var results = scheduler.startWithTiming(
-        function() {
-          return collection.type('foo');
-        },
-        50,
-        90,
-        600
-      );
-
-      RxTest.assert(results.messages, [
-        RxTest.onNext(100, ['abc']),
-        RxTest.onNext(150, ['123']),
-        RxTest.onNext(200, ['def']),
-        RxTest.onNext(250, ['456']),
-        RxTest.onCompleted(500)
-      ]); 
+  describe('data streams', function() {
+    it('lookup by id', function() {
+      const spy = sinon.spy();
+      collection.id(1).observe(spy);
+      process.nextTick(function() {
+        endpoints[0].broadcastData(1234); 
+        expect(spy.lastCall.args[0].value).to.equal(1234);
+      });
     });
 
-    it('returns datastream for single match', function() {
-      var results = scheduler.startWithTiming(
-        function() {
-          return collection.type('qux');
-        },
-        50,
-        90,
-        600
-      );
-
-      RxTest.assert(results.messages, [
-        RxTest.onNext(125, ['xyz']),
-        RxTest.onNext(225, ['qwerty']),
-        RxTest.onCompleted(500)
-      ]); 
-    });
-
-    it('returns empty stream when no match is found', function() {
-      var results = scheduler.startWithTiming(
-        function() {
-          return collection.type('NOPE');
-        },
-        50,
-        90,
-        600
-      );
-
-      RxTest.assert(results.messages, []); 
-    });
-  });
-
-  describe('command stream', function() {
-    var scheduler, collection, stream1, stream2;
-
-    beforeEach(function() {
-      scheduler = new Rx.TestScheduler();
-
-      stream1 = scheduler.createHotObservable(
-          RxTest.onNext(100, 'foo'),
-          RxTest.onNext(200, 'foo'),
-          RxTest.onCompleted(500)
-      );
-      
-      stream2 = scheduler.createHotObservable(
-          RxTest.onNext(150, 'bar'),
-          RxTest.onNext(250, 'bar'),
-          RxTest.onCompleted(500)
-      );
-
-      collection = new EndpointCollection([]);
-    });
-
-    it('allows injecting multiple command streams', function() {
-      var results = scheduler.startWithTiming(
-        function() {
-          collection.injectCommands(stream1);
-          collection.injectCommands(stream2);
-          return collection.commands;
-        },
-        50,
-        90,
-        300
-      );
-
-      RxTest.assert(results.messages, [
-        RxTest.onNext(100, ['foo']),
-        RxTest.onNext(150, ['bar']),
-        RxTest.onNext(200, ['foo']),
-        RxTest.onNext(250, ['bar']),
-      ]); 
-
+    it('lookup by type', function() {
+      const spy = sinon.spy();
+      collection.type('foo').observe(spy);
+      process.nextTick(function() {
+        endpoints[0].broadcastData(1234);
+        endpoints[1].broadcastData(4321);
+        expect(spy.firstCall.args[0].value).to.equal(1234);
+        expect(spy.lastCall.args[0].value).to.equal(4321);
+      });
     });
   });
 });
