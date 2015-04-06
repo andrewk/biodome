@@ -4,29 +4,17 @@ import sinon from 'sinon';
 import rewire from 'rewire';
 import EventEmitter from 'eventemitter3';
 import commandStream from '../../lib/commandStream';
-import BaseDriver from '../../lib/drivers/base';
+import params from '../endpoint-params'; 
 
 const Endpoint = rewire("../../lib/endpoint");
 const expect = chai.expect;
 chai.use(chaiAsPromised);
 
-function options(base={}) {
-  base.id = base.id || 123;
-  base.type = base.type || 'sensor';
-  base.eventBus = base.eventBus || new EventEmitter();
-  base.commandMatcher = base.commandMatcher || () => true;
-  base.driver = new BaseDriver({
-    'read': () => Promise.resolve(1),
-    'write': (val) => Promise.resolve(val)  
-  });
-  return base;
-}
-
 describe('Endpoint', function() {
   it('emits data via eventBus', function() {
     const spy = sinon.spy();
     const ep = new Endpoint(
-      options({
+      params({
         'id': 4,
         'type': 1
       })
@@ -55,7 +43,7 @@ describe('Endpoint', function() {
 
     it('calls endpoint.read', function() {
       const spy = sinon.spy();
-      const ep = new Endpoint(options({'refreshRate': 500}));
+      const ep = new Endpoint(params({'refreshRate': 500}));
       ep.read = spy;
       expect(spy.called).to.be.false;
       clock.tick(501);
@@ -65,7 +53,7 @@ describe('Endpoint', function() {
 
   describe('subscribeToCommands', function() {
     it('executes write commands approved by its commandMatcher', function(done) {
-      const ep = new Endpoint(options());
+      const ep = new Endpoint(params());
       const spy = sinon.spy();
 
       const writeStub = function(value) {
@@ -90,7 +78,7 @@ describe('Endpoint', function() {
     });
 
     it('executes read commands approved by its commandMatcher', function(done) {
-      let opt = options();
+      let opt = params();
 
       const ep = new Endpoint(opt);
       const spy = sinon.spy();
@@ -120,7 +108,7 @@ describe('Endpoint', function() {
       const errorSpy = sinon.spy();
       Endpoint.__set__('log', { 'error': errorSpy });
 
-      const ep = new Endpoint(options());
+      const ep = new Endpoint(params());
       const writeStub = function(value) {
         return Promise.reject(0);
       };
@@ -137,7 +125,7 @@ describe('Endpoint', function() {
       const errorSpy = sinon.spy();
       Endpoint.__set__('log', { 'error': errorSpy });
 
-      const ep = new Endpoint(options());
+      const ep = new Endpoint(params());
       const readStub = function(value) {
         return Promise.reject(0);
       };
@@ -164,7 +152,7 @@ describe('Endpoint', function() {
         const errorSpy = sinon.spy();
         Endpoint.__set__('log', { 'error': errorSpy });
 
-        const ep = new Endpoint(options({'writeTimeout': 200}));
+        const ep = new Endpoint(params({'writeTimeout': 200}));
         const stub = function(value) {
           return new Promise(function(res, rej) {});
         };
@@ -182,7 +170,7 @@ describe('Endpoint', function() {
         const errorSpy = sinon.spy();
         Endpoint.__set__('log', { 'error': errorSpy });
 
-        const ep = new Endpoint(options({'readTimeout': 200}));
+        const ep = new Endpoint(params({'readTimeout': 200}));
         const stub = function(value) {
           return new Promise(function(res, rej) {});
         };
