@@ -1,9 +1,9 @@
-var chai = require('chai'),
-  expect = chai.expect,
-  sinon = require('sinon'),
-  driver = require('../../../lib/drivers/inverted'),
-  chaiAsPromised = require('chai-as-promised');
+import chai from 'chai';
+import sinon from 'sinon';
+import chaiAsPromised from 'chai-as-promised';
+import InvertedDriver from '../../../lib/drivers/inverted';
 
+const expect = chai.expect;
 chai.use(chaiAsPromised);
 
 describe('Driver::Inverted', function() {
@@ -15,7 +15,7 @@ describe('Driver::Inverted', function() {
         return Promise.resolve();
       };
 
-      var d = driver.new({ 'write': writeStub });
+      var d = new InvertedDriver({ 'write': writeStub });
       return expect(d.write(1)).to.be.fulfilled.then(function(value) {
         expect(spy.lastCall.args[0]).to.equal(0);
       });
@@ -30,7 +30,7 @@ describe('Driver::Inverted', function() {
         return Promise.resolve(0);
       };
 
-      var d = driver.new({'read': readStub });
+      var d = new InvertedDriver({'read': readStub });
       expect(d.read()).to.eventually.equal(1);
     });
   });

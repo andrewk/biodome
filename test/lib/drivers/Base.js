@@ -1,9 +1,9 @@
-var chai = require('chai'),
-  expect = chai.expect,
-  sinon = require('sinon'),
-  driver = require('../../../lib/drivers/base'),
-  chaiAsPromised = require('chai-as-promised');
+import chai from 'chai';
+import sinon from 'sinon';
+import chaiAsPromised from 'chai-as-promised';
+import Driver from '../../../lib/drivers/base';
 
+const expect = chai.expect;
 chai.use(chaiAsPromised);
 
 describe('Driver::Base', function() {
@@ -15,7 +15,7 @@ describe('Driver::Base', function() {
         return Promise.resolve();
       };
 
-      var d = driver.new({ 'write': writeStub });
+      var d = new Driver({ 'write': writeStub });
       return expect(d.write(3456)).to.be.fulfilled.then(function(value) {
         expect(spy.lastCall.args[0]).to.equal(3456);
       });
@@ -30,7 +30,7 @@ describe('Driver::Base', function() {
         return Promise.resolve(1234);
       };
 
-      var d = driver.new({ 'read': readStub });
+      var d = new Driver({ 'read': readStub });
       expect(d.read()).to.eventually.equal(1234);
     });
   });
