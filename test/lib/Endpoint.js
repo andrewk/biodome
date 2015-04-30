@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import rewire from 'rewire';
 import EventEmitter from 'eventemitter3';
 import commandStream from '../../lib/commandStream';
-import params from '../endpoint-params'; 
+import params from '../endpoint-params';
 
 const Endpoint = rewire("../../lib/endpoint");
 const expect = chai.expect;
@@ -51,7 +51,7 @@ describe('Endpoint', function() {
     });
   });
 
-  describe('subscribeToCommands', function() {
+  describe('subscribeToCommands', function(done) {
     it('executes write commands approved by its commandMatcher', function(done) {
       const ep = new Endpoint(params());
       const spy = sinon.spy();
@@ -65,12 +65,13 @@ describe('Endpoint', function() {
       const commandEvents = new EventEmitter();
       ep.subscribeToCommands(commandStream(commandEvents));
 
-      process.nextTick(() => {
-        commandEvents.emit('command', {
-          'selector': {'id': 'foo'},
-          'instruction': {'type': 'write', 'value': 'qux'}
-        });
+      commandEvents.emit('command', {
+        'selector': {'id': 'foo'},
+        'instruction': {'type': 'write', 'value': 'qux'}
+      });
 
+      // allow time for Promises to fulfill
+      process.nextTick(() => {
         expect(spy.called).to.be.true;
         expect(spy.firstCall.args[0]).to.equal('qux');
         done();
@@ -91,12 +92,12 @@ describe('Endpoint', function() {
       const commandEvents = new EventEmitter();
       ep.subscribeToCommands(commandStream(commandEvents));
 
-      process.nextTick(() => {
-        commandEvents.emit('command', {
-          'selector': {'id': 'foo'},
-          'instruction': {'type': 'read'}
-        });
+      commandEvents.emit('command', {
+        'selector': {'id': 'foo'},
+        'instruction': {'type': 'read'}
+      });
 
+      process.nextTick(() => {
         expect(spy.called).to.be.true;
         done();
       });
