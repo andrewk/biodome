@@ -22,12 +22,9 @@ describe('Server', function() {
         res.end('200');
       };
 
-      var socketHandler = function(client) {
-        socketSpy();
-        client.close();
-      };
-
-      srv = new Server({'port': 6676}, requestHandler, socketHandler);
+      srv = new Server({'port': 6676}, requestHandler);
+      srv.registerSocketClient = socketSpy;
+      srv.requestHandler = requestHandler;
     });
 
     it('uses composed request handler', function(done) {
@@ -41,12 +38,12 @@ describe('Server', function() {
         });
     });
 
-    it('uses composed socket handler', function(done) {
+    it('registers socket client', function(done) {
       var client = new ws('ws://localhost:6676');
       client.on('open', function() {
         expect(socketSpy.called).to.be.true;
         srv.close();
-        done(); 
+        done();
       });
     });
   });
