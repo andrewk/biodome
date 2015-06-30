@@ -1,12 +1,11 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
-import rewire from 'rewire';
 import EventEmitter from 'eventemitter3';
 import commandStream from '../../lib/commandStream';
 import params from '../endpoint-params';
+import Endpoint from '../../lib/Endpoint';
 
-const Endpoint = rewire("../../lib/endpoint");
 const expect = chai.expect;
 chai.use(chaiAsPromised);
 
@@ -104,6 +103,7 @@ describe('Endpoint', function() {
     });
   });
 
+  // FIXME: replace rewire w/ something ES6-compatible
   describe.skip('error handling', function() {
     it('logs driver error during write', function() {
       const errorSpy = sinon.spy();
