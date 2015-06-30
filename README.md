@@ -1,4 +1,4 @@
-<img src="https://github.com/andrewk/node-biodome/raw/master/assets/logo-web.png">
+<cimg src="https://github.com/andrewk/node-biodome/raw/master/assets/logo-web.png">
 
 # Biodome
 
@@ -21,53 +21,23 @@ Biodome provides a reactive interface to reading data (sensors, APIs, etc) and p
 
 By using [most](https://github.com/cujojs/most) to provide an Observable interface to your sensor data, Biodome enables you to express complex conditions in a functional syntax and then act upon those by injecting commands into the command stream.
 
+## Fundemental concepts
+
+The core of a Biodome system are two observable streams. Every service in the system -- whether it be in the server or accessing via the socket API -- shares these streams. In this way, horizontal scaling is eased by moving endpoints or funtionality to different hardware without significant impact on the code for those areas of concern.
+
+### Data stream
+The data stream is an observable containing data from Endpoints. All Endpoints within a system share a data stream. Each endpoint publishes to the data stream at the highest frequency it is capable of. It is up to consumers to throttle and filter the data stream.
+
+### Command stream
+All commands for devices (represented as Endpoints) are published to the command stream. Any command-generating part of the system (eg: a scheduler) publishes to the stream at its highest frequency. If some endpoints need their command frequency limited for hardware reasons, this is to be enforced by the Endpoint in its command subscription.
+
 ## System Design
 
 ### Endpoint
 
-The Endpoints are the most important component. They consume instructions from a command stream, and produce a data stream. If the Endpoint is a device, such as a relay or LCD, you'll be most interested in its command stream. If it's a sensor, you'll be more interested in its data stream. Both of these streams are "hot observables" in RxJS terminology; instances of `Rx.Subject`.
+The Endpoints are the most important component. They consume instructions from a command stream, and produce a data stream. If the Endpoint is a device, such as a relay or LCD, you'll be most interested in its command stream. If it's a sensor, you'll be more interested in its data stream.
 
 An Endpoint's identifying information is its `id` – which is expected to be unique – and its `type`, a free text property to allow you to group Endpoints within the system. Each endpoint requires a Driver, which in turn requires an IO instance. This composition is designed to enable a wide range of hardware support without constantly defining new types of Endpoints just to support minor differences.
-
-### EndpointCollection
-
-An EndpointCollection provides an interface for accessing Endpoint data streams by Endpoint `id` or by Endpoint `type`. For example:
-
-```javascript
-var biodome = require('biodome');
-
-var endpoints = biodome.endpoints([
-  biodome.endpoint({
-    'id': 'temperature',
-    'type': 'weather-sensor',
-    'driver': biodome.drivers.base(
-      biodome.io.owfs('/10.E89C8A020800/temperature')
-    )
-  }),
-
-  biodome.endpoint({
-    'id': 'windspeed',
-    'type': 'weather-sensor',
-    'driver': biodome.drivers.base(
-      biodome.io.owfs('/10.E89C8A020810/windspeed')
-    )
-  }),
-
-  biodome.endpoint({
-    'id': 'windspeed',
-    'type': 'weather-sensor',
-    'driver': biodome.drivers.base(
-      biodome.io.owfs('/10.E89C8A020802/humidity')
-    )
-  }),
-]);
-
-// data stream of temperature
-var temperature = endpoints.id('temperature');
-
-// merged data stream of all three
-var weatherData = endpoints.type('weather-sensor');
-```
 
 ### Driver
 
