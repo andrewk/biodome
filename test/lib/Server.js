@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
 import ws from 'ws';
+import EventEmitter from 'eventemitter3';
 import Server from '../../lib/Server';
 
 describe('Server', function() {
@@ -22,7 +23,7 @@ describe('Server', function() {
         res.end('200');
       };
 
-      srv = new Server({'port': 6676}, requestHandler);
+      srv = new Server({'port': 6676, events: new EventEmitter});
       srv.registerSocketClient = socketSpy;
       srv.requestHandler = requestHandler;
     });
