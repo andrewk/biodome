@@ -19,16 +19,12 @@
   },
   "dependencies": {
     "babel": "^5.0.0",
-    "bluebird": "^2.0.0",
     "bunyan": "^1.3.5",
-    "envc": "^1.0.0",
     "eslint-loader": "^0.10.0",
     "eventemitter3": "^0.1.6",
     "graceful-fs": "^3.0.5",
     "jwt-simple": "~0.2.0",
     "most": "^0.13.1",
-    "owjs": "0.1.x",
-    "rx": "2.3.22",
     "ws": "~0.7.0"
   },
   "devDependencies": {
