@@ -23,7 +23,7 @@ By using [most](https://github.com/cujojs/most) to provide an Observable interfa
 
 ## Fundemental concepts
 
-The core of a Biodome system are two observable streams. Every service in the system -- whether it be in the server or accessing via the socket API -- shares these streams. In this way, horizontal scaling is eased by moving endpoints or funtionality to different hardware without significant impact on the code for those areas of concern.
+The core of a Biodome system are two observable streams. Every service in the system -- whether it be in the server or accessing via the socket API -- shares these streams. In this way, horizontal scaling is eased by moving endpoints or functionality to different hardware without significant impact on the code for those areas of concern.
 
 ### Data stream
 The data stream is an observable containing data from Endpoints. All Endpoints within a system share a data stream. Each endpoint publishes to the data stream at the highest frequency it is capable of. It is up to consumers to throttle and filter the data stream.
